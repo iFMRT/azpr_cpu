@@ -19,68 +19,68 @@
 
 /********** モジュール **********/
 module mem_reg (
-	/********** クロック & リセット **********/
-	input  wire				   clk,			 // クロック
-	input  wire				   reset,		 // 非同期リセット
-	/********** メモリアクセス結果 **********/
-	input  wire [`WordDataBus] out,			 // メモリアクセス結果
-	input  wire				   miss_align,	 // ミスアライン
-	/********** パイプライン制御信号 **********/
-	input  wire				   stall,		 // ストール
-	input  wire				   flush,		 // フラッシュ
-	/********** EX/MEMパイプラインレジスタ **********/
-	input  wire [`WordAddrBus] ex_pc,		 // プログランカウンタ
-	input  wire				   ex_en,		 // パイプラインデータの有効
-	input  wire				   ex_br_flag,	 // 分岐フラグ
-	input  wire [`CtrlOpBus]   ex_ctrl_op,	 // 制御レジスタオペレーション
-	input  wire [`RegAddrBus]  ex_dst_addr,	 // 汎用レジスタ書き込みアドレス
-	input  wire				   ex_gpr_we_,	 // 汎用レジスタ書き込み有効
-	input  wire [`IsaExpBus]   ex_exp_code,	 // 例外コード
-	/********** MEM/WBパイプラインレジスタ **********/
-	output reg	[`WordAddrBus] mem_pc,		 // プログランカウンタ
-	output reg				   mem_en,		 // パイプラインデータの有効
-	output reg				   mem_br_flag,	 // 分岐フラグ
-	output reg	[`CtrlOpBus]   mem_ctrl_op,	 // 制御レジスタオペレーション
-	output reg	[`RegAddrBus]  mem_dst_addr, // 汎用レジスタ書き込みアドレス
-	output reg				   mem_gpr_we_,	 // 汎用レジスタ書き込み有効
-	output reg	[`IsaExpBus]   mem_exp_code, // 例外コード
-	output reg	[`WordDataBus] mem_out		 // 処理結果
+	/********** 时钟& 复位 **********/
+	input wire                clk,          // 时钟
+	input wire                reset,        // 异步复位
+	/********** 内存访问结果 **********/
+	input wire [`WordDataBus] out,          // 内存访问结果
+	input wire                miss_align,   // 未对齐
+	/********** 流水线控制信号 **********/
+	input wire                stall,        // 停顿
+	input wire                flush,        // 清空
+	/********** EX/MEM 流水线寄存器 **********/
+	input wire [`WordAddrBus] ex_pc,        // 程序计数器
+	input wire                ex_en,        // 流水线数据是否有效
+	input wire                ex_br_flag,   // 分支标志位
+	input wire [`CtrlOpBus]   ex_ctrl_op,   // 控制寄存器操作
+	input wire [`RegAddrBus]  ex_dst_addr,  // 通用寄存器写入地址
+	input wire                ex_gpr_we_,   // 通用寄存器写入有效
+	input wire [`IsaExpBus]   ex_exp_code,  // 异常代码
+	/********** MEM/WB 流水线寄存器 **********/
+	output reg [`WordAddrBus] mem_pc,       // 程序计数器
+	output reg                mem_en,       // 流水线数据是否有效
+	output reg                mem_br_flag,  // 分支标志位
+	output reg [`CtrlOpBus]   mem_ctrl_op,  // 控制寄存器操作
+	output reg [`RegAddrBus]  mem_dst_addr, // 通用寄存器写入地址
+	output reg                mem_gpr_we_,  // 通用寄存器写入有效
+	output reg [`IsaExpBus]   mem_exp_code, // 异常代码
+	output reg [`WordDataBus] mem_out		    //　处理结果
 );
 
-	/********** パイプラインレジスタ **********/
+	/********** 流水线寄存器 **********/
 	always @(posedge clk or `RESET_EDGE reset) begin
-		if (reset == `RESET_ENABLE) begin	 
-			/* 非同期リセット */
-			mem_pc		 <= #1 `WORD_ADDR_W'h0;
-			mem_en		 <= #1 `DISABLE;
+		if (reset == `RESET_ENABLE) begin
+			/* 异步复位 */
+			mem_pc		   <= #1 `WORD_ADDR_W'h0;
+			mem_en		   <= #1 `DISABLE;
 			mem_br_flag	 <= #1 `DISABLE;
 			mem_ctrl_op	 <= #1 `CTRL_OP_NOP;
 			mem_dst_addr <= #1 `REG_ADDR_W'h0;
 			mem_gpr_we_	 <= #1 `DISABLE_;
 			mem_exp_code <= #1 `ISA_EXP_NO_EXP;
-			mem_out		 <= #1 `WORD_DATA_W'h0;
+			mem_out		   <= #1 `WORD_DATA_W'h0;
 		end else begin
 			if (stall == `DISABLE) begin 
-				/* パイプラインレジスタの更新 */
-				if (flush == `ENABLE) begin				  // フラッシュ
-					mem_pc		 <= #1 `WORD_ADDR_W'h0;
-					mem_en		 <= #1 `DISABLE;
+				/* 流水线寄存器的更新 */
+				if (flush == `ENABLE) begin				  // 清空
+					mem_pc		   <= #1 `WORD_ADDR_W'h0;
+					mem_en		   <= #1 `DISABLE;
 					mem_br_flag	 <= #1 `DISABLE;
 					mem_ctrl_op	 <= #1 `CTRL_OP_NOP;
 					mem_dst_addr <= #1 `REG_ADDR_W'h0;
 					mem_gpr_we_	 <= #1 `DISABLE_;
 					mem_exp_code <= #1 `ISA_EXP_NO_EXP;
-					mem_out		 <= #1 `WORD_DATA_W'h0;
-				end else if (miss_align == `ENABLE) begin // ミスアライン例外
-					mem_pc		 <= #1 ex_pc;
-					mem_en		 <= #1 ex_en;
+					mem_out		   <= #1 `WORD_DATA_W'h0;
+				end else if (miss_align == `ENABLE) begin // 未对齐异常
+					mem_pc		   <= #1 ex_pc;
+					mem_en		   <= #1 ex_en;
 					mem_br_flag	 <= #1 ex_br_flag;
 					mem_ctrl_op	 <= #1 `CTRL_OP_NOP;
 					mem_dst_addr <= #1 `REG_ADDR_W'h0;
 					mem_gpr_we_	 <= #1 `DISABLE_;
 					mem_exp_code <= #1 `ISA_EXP_MISS_ALIGN;
-					mem_out		 <= #1 `WORD_DATA_W'h0;
-				end else begin							  // 次のデータ
+					mem_out		   <= #1 `WORD_DATA_W'h0;
+				end else begin							  // 下一个数据
 					mem_pc		 <= #1 ex_pc;
 					mem_en		 <= #1 ex_en;
 					mem_br_flag	 <= #1 ex_br_flag;

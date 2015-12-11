@@ -1,79 +1,79 @@
 ﻿/*
  -- ============================================================================
  -- FILE NAME	: mem_ctrl.v
- -- DESCRIPTION : メモリアクセス制御ユニット
+ -- DESCRIPTION : 内存访问控制模块
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
  -- 1.0.0	  2011/06/27  suito		 新規作成
  -- ============================================================================
 */
 
-/********** 共通ヘッダファイル **********/
+/********** 通用头文件 **********/
 `include "nettype.h"
 `include "global_config.h"
 `include "stddef.h"
 
-/********** 個別ヘッダファイル **********/
+/********** 专用头文件 **********/
 `include "isa.h"
 `include "cpu.h"
 `include "bus.h"
 
 /********** モジュール **********/
 module mem_ctrl (
-	/********** EX/MEMパイプラインレジスタ **********/
-	input  wire				   ex_en,		   // パイプラインデータの有効
-	input  wire [`MemOpBus]	   ex_mem_op,	   // メモリオペレーション
-	input  wire [`WordDataBus] ex_mem_wr_data, // メモリ書き込みデータ
-	input  wire [`WordDataBus] ex_out,		   // 処理結果
-	/********** メモリアクセスインタフェース **********/
-	input  wire [`WordDataBus] rd_data,		   // 読み出しデータ
-	output wire [`WordAddrBus] addr,		   // アドレス
-	output reg				   as_,			   // アドレス有効
-	output reg				   rw,			   // 読み／書き
-	output wire [`WordDataBus] wr_data,		   // 書き込みデータ
-	/********** メモリアクセス結果 **********/
-	output reg [`WordDataBus]  out	 ,		   // メモリアクセス結果
-	output reg				   miss_align	   // ミスアライン
+	/********** EX/MEM 流水线寄存器 **********/
+	input wire                 ex_en,          // 流水线数据是否
+	input wire [`MemOpBus]     ex_mem_op,      // 内存操作
+	input wire [`WordDataBus]  ex_mem_wr_data, // 内存写入数据
+	input wire [`WordDataBus]  ex_out,         // 处理结果
+	/********** 内存访问接口 **********/
+	input wire [`WordDataBus]  rd_data,        // 读取的数据
+	output wire [`WordAddrBus] addr,           // 地址
+	output reg                 as_,            // 地址选通
+	output reg                 rw,             // 读/写
+	output wire [`WordDataBus] wr_data,        // 写入的数据
+	/********** 内存访问  **********/
+	output reg [`WordDataBus]  out ,           // 内存访问结果
+	output reg                 miss_align	   // 未对齐
 );
 
 	/********** 内部信号 **********/
-	wire [`ByteOffsetBus]	 offset;		   // オフセット
+  wire [`ByteOffsetBus]      offset;		     // 字节偏移
 
-	/********** 出力のアサイン **********/
-	assign wr_data = ex_mem_wr_data;		   // 書き込みデータ
-	assign addr	   = ex_out[`WordAddrLoc];	   // アドレス
-	assign offset  = ex_out[`ByteOffsetLoc];   // オフセット
+	/********** 输出的赋值 **********/
+	assign wr_data = ex_mem_wr_data;		     // 写入数据
+	assign addr	   = ex_out[`WordAddrLoc];	     // 地址
+	assign offset  = ex_out[`ByteOffsetLoc];     // 偏移
 
-	/********** メモリアクセスの制御 **********/
+	/********** 内存访问的控制 **********/
 	always @(*) begin
-		/* デフォルト値 */
+		/* 默认值 */
 		miss_align = `DISABLE;
-		out		   = `WORD_DATA_W'h0;
-		as_		   = `DISABLE_;
-		rw		   = `READ;
-		/* メモリアクセス */
+		out		     = `WORD_DATA_W'h0;
+		as_		     = `DISABLE_;
+		rw		     = `READ;
+		/* 内存访问 */
 		if (ex_en == `ENABLE) begin
 			case (ex_mem_op)
-				`MEM_OP_LDW : begin // ワード読み出し
-					/* バイトオフセットのチェック */
-					if (offset == `BYTE_OFFSET_WORD) begin // アライン
-						out			= rd_data;
-						as_		   = `ENABLE_;
-					end else begin						   // ミスアライン
-						miss_align	= `ENABLE;
+				`MEM_OP_LDW : begin                        // 字读取
+					/* 字节偏移的检测 */
+					if (offset == `BYTE_OFFSET_WORD) begin // 对齐
+						out			    = rd_data;
+						as_		      　　= `ENABLE_;
+					end else begin						   // 未对齐
+						miss_align	　　　　= `ENABLE;
 					end
 				end
-				`MEM_OP_STW : begin // ワード書き込み
-					/* バイトオフセットのチェック */
-					if (offset == `BYTE_OFFSET_WORD) begin // アライン
-						rw			= `WRITE;
-						as_		   = `ENABLE_;
-					end else begin						   // ミスアライン
-						miss_align	= `ENABLE;
+				  `MEM_OP_STW : begin                      // 字写入
+					/* 字节偏移的检测 */
+					if (offset == `BYTE_OFFSET_WORD) begin // 对齐
+						rw		    	= `WRITE;
+						as_		      　　= `ENABLE_;
+					end else begin						   // 未对齐
+						miss_align	　　　　= `ENABLE;
 					end
 				end
-				default		: begin // メモリアクセスなし
-					out			= ex_out;
+				default		: begin                        // 无内存访问
+					out			      　　= ex_out;
 				end
 			endcase
 		end
