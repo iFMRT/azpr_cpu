@@ -19,55 +19,55 @@
 /********** 模块 **********/
 module spm (
 	/********** 输入输出参数 **********/
-	input  wire				   clk,				// 时钟
+	input wire                 clk,            // 时钟
 	/********** 端口A : IF阶段 **********/
-	input  wire [`SpmAddrBus]  if_spm_addr,		// ?????
-	input  wire				   if_spm_as_,		// ??????????`??
-	input  wire				   if_spm_rw,		// ?i???????
-	input  wire [`WordDataBus] if_spm_wr_data,	// ?????z???`??
-	output wire [`WordDataBus] if_spm_rd_data,	// ?i???????`??
+	input wire [`SpmAddrBus]   if_spm_addr,    // 地址
+	input wire                 if_spm_as_,     // 地址选通
+	input wire                 if_spm_rw,      // 读/写
+	input wire [`WordDataBus]  if_spm_wr_data, // 写入的数据
+	output wire [`WordDataBus] if_spm_rd_data, // 读取的数据
 	/********** 端口B : MEM阶段 **********/
-	input  wire [`SpmAddrBus]  mem_spm_addr,	// ?????
-	input  wire				   mem_spm_as_,		// ??????????`??
-	input  wire				   mem_spm_rw,		// ?i???????
-	input  wire [`WordDataBus] mem_spm_wr_data, // ?????z???`??
-	output wire [`WordDataBus] mem_spm_rd_data	// ?i???????`??
+	input wire [`SpmAddrBus]   mem_spm_addr,   // 地址
+	input wire                 mem_spm_as_,    // 地址选通
+	input wire                 mem_spm_rw,     // 读/写
+	input wire [`WordDataBus]  mem_spm_wr_data,// 写入的数据
+	output wire [`WordDataBus] mem_spm_rd_data // 读取的数据
 );
 
-	/********** ?????z???????? **********/
-	reg						   wea;			// ??`?? A
-	reg						   web;			// ??`?? B
+	/********** 内部信号 **********/
+	reg						   wea;			// 端口 A 写入有效
+	reg						   web;			// 端口 B 写入有效
 
-	/********** ?????z????????????? **********/
+	/********** 写入有效信号的生成 **********/
 	always @(*) begin
-		/* 端口A */
-		if ((if_spm_as_ == `ENABLE_) && (if_spm_rw == `WRITE)) begin   
-			wea = `MEM_ENABLE;	// ?????z?????
+		/* 端口A 写入有效信号的生成 */
+		if ((if_spm_as_ == `ENABLE_) && (if_spm_rw == `WRITE)) begin
+			wea = `MEM_ENABLE;	// 写入有效
 		end else begin
-			wea = `MEM_DISABLE; // ?????z??o??
+			wea = `MEM_DISABLE; // 写入无效
 		end
-		/* 端口B */
+		/* 端口B 写入有效信号的生成 */
 		if ((mem_spm_as_ == `ENABLE_) && (mem_spm_rw == `WRITE)) begin
-			web = `MEM_ENABLE;	// ?????z?????
+			web = `MEM_ENABLE;	// 写入有效
 		end else begin
-			web = `MEM_DISABLE; // ?????z??o??
+			web = `MEM_DISABLE; // 写入无效
 		end
 	end
 
 	/********** Xilinx FPGA Block RAM :->altera_dpram **********/
 	altera_dpram x_s3e_dpram (
-		/********** 端口A : IF????`?? **********/
-		.clock_a  (clk),			  // ????a?
-		.address_a (if_spm_addr),	  // ?????
-		.data_a  (if_spm_wr_data),  // ?????z???`????????A??
-		.wren_a   (wea),			  // ?????z???????????`???
-		.q_a (if_spm_rd_data),  // ?i???????`??
-		/********** 端口B : MEM????`?? **********/
-		.clock_b  (clk),			  // ????a?
-		.address_b (mem_spm_addr),	  // ?????
-		.data_b  (mem_spm_wr_data), // ?????z???`??
-		.wren_b   (web),			  // ?????z?????
-		.q_b (mem_spm_rd_data)  // ?i???????`??
+		/********** 端口A : IF阶段 **********/
+		.clock_a  (clk),			        // 时钟
+		.address_a (if_spm_addr),     		// 地址
+		.data_a  (if_spm_wr_data),    		// 写入的数据（未连接）
+		.wren_a   (wea),			        // 写入有效（无效）
+		.q_a (if_spm_rd_data),        		// 读取的数据
+		/********** 端口B : MEM 阶段 **********/
+		.clock_b  (clk),			        // 时钟
+		.address_b (mem_spm_addr),	  		// 地址
+		.data_b  (mem_spm_wr_data),   		//　写入的数据
+		.wren_b   (web),			        // 写入有效
+		.q_b (mem_spm_rd_data)        		// 读取的数据
 	);
-  
+
 endmodule
