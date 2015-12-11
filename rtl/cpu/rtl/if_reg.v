@@ -1,60 +1,60 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: if_reg.v
- -- DESCRIPTION : IF¥¹¥Æ©`¥¸¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿
+ -- DESCRIPTION : IFã‚¹ãƒ†ãƒ¼ã‚¸ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** ¹²Í¨¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å…±é€šãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "nettype.h"
 `include "global_config.h"
 `include "stddef.h"
 
-/********** ‚€„e¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å€‹åˆ¥ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "isa.h"
 `include "cpu.h"
 
-/********** ¥â¥¸¥å©`¥ë **********/
+/********** ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ« **********/
 module if_reg (
-	/********** ¥¯¥í¥Ã¥¯ & ¥ê¥»¥Ã¥È **********/
-	input  wire				   clk,		   // ¥¯¥í¥Ã¥¯
-	input  wire				   reset,	   // ·ÇÍ¬ÆÚ¥ê¥»¥Ã¥È
-	/********** ¥Õ¥§¥Ã¥Á¥Ç©`¥¿ **********/
-	input  wire [`WordDataBus] insn,	   // ¥Õ¥§¥Ã¥Á¤·¤¿ÃüÁî
-	/********** ¥Ñ¥¤¥×¥é¥¤¥óÖÆÓùĞÅºÅ **********/
-	input  wire				   stall,	   // ¥¹¥È©`¥ë
-	input  wire				   flush,	   // ¥Õ¥é¥Ã¥·¥å
-	input  wire [`WordAddrBus] new_pc,	   // ĞÂ¤·¤¤¥×¥í¥°¥é¥à¥«¥¦¥ó¥¿
-	input  wire				   br_taken,   // ·Öáª¤Î³ÉÁ¢
-	input  wire [`WordAddrBus] br_addr,	   // ·ÖáªÏÈ¥¢¥É¥ì¥¹
-	/********** IF/ID¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
-	output reg	[`WordAddrBus] if_pc,	   // ¥×¥í¥°¥é¥à¥«¥¦¥ó¥¿
-	output reg	[`WordDataBus] if_insn,	   // ÃüÁî
-	output reg				   if_en	   // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
+	/********** ã‚¯ãƒ­ãƒƒã‚¯ & ãƒªã‚»ãƒƒãƒˆ **********/
+	input  wire				   clk,		   // ã‚¯ãƒ­ãƒƒã‚¯
+	input  wire				   reset,	   // éåŒæœŸãƒªã‚»ãƒƒãƒˆ
+	/********** ãƒ•ã‚§ãƒƒãƒãƒ‡ãƒ¼ã‚¿ **********/
+	input  wire [`WordDataBus] insn,	   // ãƒ•ã‚§ãƒƒãƒã—ãŸå‘½ä»¤
+	/********** ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³åˆ¶å¾¡ä¿¡å· **********/
+	input  wire				   stall,	   // ã‚¹ãƒˆãƒ¼ãƒ«
+	input  wire				   flush,	   // ãƒ•ãƒ©ãƒƒã‚·ãƒ¥
+	input  wire [`WordAddrBus] new_pc,	   // æ–°ã—ã„ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿
+	input  wire				   br_taken,   // åˆ†å²ã®æˆç«‹
+	input  wire [`WordAddrBus] br_addr,	   // åˆ†å²å…ˆã‚¢ãƒ‰ãƒ¬ã‚¹
+	/********** IF/IDãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
+	output reg	[`WordAddrBus] if_pc,	   // ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿
+	output reg	[`WordDataBus] if_insn,	   // å‘½ä»¤
+	output reg				   if_en	   // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
 );
 
-	/********** ¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
+	/********** ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
 	always @(posedge clk or `RESET_EDGE reset) begin
 		if (reset == `RESET_ENABLE) begin 
-			/* ·ÇÍ¬ÆÚ¥ê¥»¥Ã¥È */
+			/* éåŒæœŸãƒªã‚»ãƒƒãƒˆ */
 			if_pc	<= #1 `RESET_VECTOR;
 			if_insn <= #1 `ISA_NOP;
 			if_en	<= #1 `DISABLE;
 		end else begin
-			/* ¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿¤Î¸üĞÂ */
+			/* ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ã®æ›´æ–° */
 			if (stall == `DISABLE) begin 
-				if (flush == `ENABLE) begin				// ¥Õ¥é¥Ã¥·¥å
+				if (flush == `ENABLE) begin				// ãƒ•ãƒ©ãƒƒã‚·ãƒ¥
 					if_pc	<= #1 new_pc;
 					if_insn <= #1 `ISA_NOP;
 					if_en	<= #1 `DISABLE;
-				end else if (br_taken == `ENABLE) begin // ·Öáª¤Î³ÉÁ¢
+				end else if (br_taken == `ENABLE) begin // åˆ†å²ã®æˆç«‹
 					if_pc	<= #1 br_addr;
 					if_insn <= #1 insn;
 					if_en	<= #1 `ENABLE;
-				end else begin							// ´Î¤Î¥¢¥É¥ì¥¹
+				end else begin							// æ¬¡ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
 					if_pc	<= #1 if_pc + 1'd1;
 					if_insn <= #1 insn;
 					if_en	<= #1 `ENABLE;

@@ -1,57 +1,57 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: uart_ctrl.v
- -- DESCRIPTION : UARTÖÆÓù¥â¥¸¥å©`¥ë
+ -- DESCRIPTION : UARTåˆ¶å¾¡ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** ¹²Í¨¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å…±é€šãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** ‚€„e¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å€‹åˆ¥ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "uart.h"
 
-/********** ¥â¥¸¥å©`¥ë **********/
+/********** ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ« **********/
 module uart_ctrl (
-	/********** ¥¯¥í¥Ã¥¯ & ¥ê¥»¥Ã¥È **********/
-	input  wire				   clk,		 // ¥¯¥í¥Ã¥¯
-	input  wire				   reset,	 // ·ÇÍ¬ÆÚ¥ê¥»¥Ã¥È
-	/********** ¥Ğ¥¹¥¤¥ó¥¿¥Õ¥§©`¥¹ **********/
-	input  wire				   cs_,		 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-	input  wire				   as_,		 // ¥¢¥É¥ì¥¹¥¹¥È¥í©`¥Ö
+	/********** ã‚¯ãƒ­ãƒƒã‚¯ & ãƒªã‚»ãƒƒãƒˆ **********/
+	input  wire				   clk,		 // ã‚¯ãƒ­ãƒƒã‚¯
+	input  wire				   reset,	 // éåŒæœŸãƒªã‚»ãƒƒãƒˆ
+	/********** ãƒã‚¹ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ **********/
+	input  wire				   cs_,		 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+	input  wire				   as_,		 // ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¹ãƒˆãƒ­ãƒ¼ãƒ–
 	input  wire				   rw,		 // Read / Write
-	input  wire [`UartAddrBus] addr,	 // ¥¢¥É¥ì¥¹
-	input  wire [`WordDataBus] wr_data,	 // •ø¤­Şz¤ß¥Ç©`¥¿
-	output reg	[`WordDataBus] rd_data,	 // Õi¤ß³ö¤·¥Ç©`¥¿
-	output reg				   rdy_,	 // ¥ì¥Ç¥£
-	/********** ¸î¤êŞz¤ß **********/
-	output reg				   irq_rx,	 // ÊÜĞÅÍêÁË¸î¤êŞz¤ß£¨ÖÆÓù¥ì¥¸¥¹¥¿ 0£©
-	output reg				   irq_tx,	 // ËÍĞÅÍêÁË¸î¤êŞz¤ß£¨ÖÆÓù¥ì¥¸¥¹¥¿ 0£©
-	/********** ÖÆÓùĞÅºÅ **********/
-	// ÊÜĞÅÖÆÓù
-	input  wire				   rx_busy,	 // ÊÜĞÅÖĞ¥Õ¥é¥°£¨ÖÆÓù¥ì¥¸¥¹¥¿ 0£©
-	input  wire				   rx_end,	 // ÊÜĞÅÍêÁËĞÅºÅ
-	input  wire [`ByteDataBus] rx_data,	 // ÊÜĞÅ¥Ç©`¥¿
-	// ËÍĞÅÖÆÓù
-	input  wire				   tx_busy,	 // ËÍĞÅÖĞ¥Õ¥é¥°£¨ÖÆÓù¥ì¥¸¥¹¥¿ 0£©
-	input  wire				   tx_end,	 // ËÍĞÅÍêÁËĞÅºÅ
-	output reg				   tx_start, // ËÍĞÅé_Ê¼ĞÅºÅ
-	output reg	[`ByteDataBus] tx_data	 // ËÍĞÅ¥Ç©`¥¿
+	input  wire [`UartAddrBus] addr,	 // ã‚¢ãƒ‰ãƒ¬ã‚¹
+	input  wire [`WordDataBus] wr_data,	 // æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+	output reg	[`WordDataBus] rd_data,	 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+	output reg				   rdy_,	 // ãƒ¬ãƒ‡ã‚£
+	/********** å‰²ã‚Šè¾¼ã¿ **********/
+	output reg				   irq_rx,	 // å—ä¿¡å®Œäº†å‰²ã‚Šè¾¼ã¿ï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0ï¼‰
+	output reg				   irq_tx,	 // é€ä¿¡å®Œäº†å‰²ã‚Šè¾¼ã¿ï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0ï¼‰
+	/********** åˆ¶å¾¡ä¿¡å· **********/
+	// å—ä¿¡åˆ¶å¾¡
+	input  wire				   rx_busy,	 // å—ä¿¡ä¸­ãƒ•ãƒ©ã‚°ï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0ï¼‰
+	input  wire				   rx_end,	 // å—ä¿¡å®Œäº†ä¿¡å·
+	input  wire [`ByteDataBus] rx_data,	 // å—ä¿¡ãƒ‡ãƒ¼ã‚¿
+	// é€ä¿¡åˆ¶å¾¡
+	input  wire				   tx_busy,	 // é€ä¿¡ä¸­ãƒ•ãƒ©ã‚°ï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0ï¼‰
+	input  wire				   tx_end,	 // é€ä¿¡å®Œäº†ä¿¡å·
+	output reg				   tx_start, // é€ä¿¡é–‹å§‹ä¿¡å·
+	output reg	[`ByteDataBus] tx_data	 // é€ä¿¡ãƒ‡ãƒ¼ã‚¿
 );
 
-	/********** ÖÆÓù¥ì¥¸¥Ä¥¿ **********/
-	// ÖÆÓù¥ì¥¸¥¹¥¿ 1 : ËÍÊÜĞÅ¥Ç©`¥¿
-	reg [`ByteDataBus]		   rx_buf;	 // ÊÜĞÅ¥Ğ¥Ã¥Õ¥¡
+	/********** åˆ¶å¾¡ãƒ¬ã‚¸ãƒ„ã‚¿ **********/
+	// åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 1 : é€å—ä¿¡ãƒ‡ãƒ¼ã‚¿
+	reg [`ByteDataBus]		   rx_buf;	 // å—ä¿¡ãƒãƒƒãƒ•ã‚¡
 
-	/********** UARTÖÆÓùÕ“Àí **********/
+	/********** UARTåˆ¶å¾¡è«–ç† **********/
 	always @(posedge clk or `RESET_EDGE reset) begin
 		if (reset == `RESET_ENABLE) begin
-			/* ·ÇÍ¬ÆÚ¥ê¥»¥Ã¥È */
+			/* éåŒæœŸãƒªã‚»ãƒƒãƒˆ */
 			rd_data	 <= #1 `WORD_DATA_W'h0;
 			rdy_	 <= #1 `DISABLE_;
 			irq_rx	 <= #1 `DISABLE;
@@ -60,51 +60,51 @@ module uart_ctrl (
 			tx_start <= #1 `DISABLE;
 			tx_data	 <= #1 `BYTE_DATA_W'h0;
 	   end else begin
-			/* ¥ì¥Ç¥£¤ÎÉú³É */
+			/* ãƒ¬ãƒ‡ã‚£ã®ç”Ÿæˆ */
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_)) begin
 				rdy_	 <= #1 `ENABLE_;
 			end else begin
 				rdy_	 <= #1 `DISABLE_;
 			end
-			/* Õi¤ß³ö¤·¥¢¥¯¥»¥¹ */
+			/* èª­ã¿å‡ºã—ã‚¢ã‚¯ã‚»ã‚¹ */
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && (rw == `READ)) begin
 				case (addr)
-					`UART_ADDR_STATUS	 : begin // ÖÆÓù¥ì¥¸¥¹¥¿ 0
+					`UART_ADDR_STATUS	 : begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0
 						rd_data	 <= #1 {{`WORD_DATA_W-4{1'b0}}, 
 										tx_busy, rx_busy, irq_tx, irq_rx};
 					end
-					`UART_ADDR_DATA		 : begin // ÖÆÓù¥ì¥¸¥¹¥¿ 1
+					`UART_ADDR_DATA		 : begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 1
 						rd_data	 <= #1 {{`BYTE_DATA_W*2{1'b0}}, rx_buf};
 					end
 				endcase
 			end else begin
 				rd_data	 <= #1 `WORD_DATA_W'h0;
 			end
-			/* •ø¤­Şz¤ß¥¢¥¯¥»¥¹ */
-			// ÖÆÓù¥ì¥¸¥¹¥¿ 0 : ËÍĞÅÍêÁË¸î¤êŞz¤ß
+			/* æ›¸ãè¾¼ã¿ã‚¢ã‚¯ã‚»ã‚¹ */
+			// åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0 : é€ä¿¡å®Œäº†å‰²ã‚Šè¾¼ã¿
 			if (tx_end == `ENABLE) begin
 				irq_tx<= #1 `ENABLE;
 			end else if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && 
 						 (rw == `WRITE) && (addr == `UART_ADDR_STATUS)) begin
 				irq_tx<= #1 wr_data[`UartCtrlIrqTx];
 			end
-			// ÖÆÓù¥ì¥¸¥¹¥¿ 0 : ÊÜĞÅÍêÁË¸î¤êŞz¤ß
+			// åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0 : å—ä¿¡å®Œäº†å‰²ã‚Šè¾¼ã¿
 			if (rx_end == `ENABLE) begin
 				irq_rx<= #1 `ENABLE;
 			end else if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && 
 						 (rw == `WRITE) && (addr == `UART_ADDR_STATUS)) begin
 				irq_rx<= #1 wr_data[`UartCtrlIrqRx];
 			end
-			// ÖÆÓù¥ì¥¸¥¹¥¿ 1
+			// åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 1
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && 
-				(rw == `WRITE) && (addr == `UART_ADDR_DATA)) begin // ËÍĞÅé_Ê¼
+				(rw == `WRITE) && (addr == `UART_ADDR_DATA)) begin // é€ä¿¡é–‹å§‹
 				tx_start <= #1 `ENABLE;
 				tx_data	 <= #1 wr_data[`BYTE_MSB:`LSB];
 			end else begin
 				tx_start <= #1 `DISABLE;
 				tx_data	 <= #1 `BYTE_DATA_W'h0;
 			end
-			/* ÊÜĞÅ¥Ç©`¥¿¤ÎÈ¡¤êŞz¤ß */
+			/* å—ä¿¡ãƒ‡ãƒ¼ã‚¿ã®å–ã‚Šè¾¼ã¿ */
 			if (rx_end == `ENABLE) begin
 				rx_buf	 <= #1 rx_data;
 			end

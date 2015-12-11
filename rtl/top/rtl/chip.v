@@ -1,20 +1,20 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: chip.v
- -- DESCRIPTION : chipÄ£¿é×é×°CPU¡¢×ÜÏß¡¢×ÜÏß´ÓÊôÉè±¸£¨ROM¡¢UART¡¢GPIO¡¢TIMER£©
+ -- DESCRIPTION : chipæ¨¡å—ç»„è£…CPUã€æ€»çº¿ã€æ€»çº¿ä»å±è®¾å¤‡ï¼ˆROMã€UARTã€GPIOã€TIMERï¼‰
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ´´½¨
- -- 1.0.1	  2014/07/27  zhangly    ±©·ç°åÉÏÒı½Å·ÖÅäÊ± gpio_in Ô¼Êøµ½ËÄ¸ökey£¬Îª¸ºÂß¼­
+ -- 1.0.0	  2011/06/27  suito		 åˆ›å»º
+ -- 1.0.1	  2014/07/27  zhangly    æš´é£æ¿ä¸Šå¼•è„šåˆ†é…æ—¶ gpio_in çº¦æŸåˆ°å››ä¸ªkeyï¼Œä¸ºè´Ÿé€»è¾‘
  -- ============================================================================
 */
 
-/********** Í¨ÓÃÍ·ÎÄ¼ş **********/
+/********** é€šç”¨å¤´æ–‡ä»¶ **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** ÏîÄ¿Í·ÎÄ¼ş **********/
+/********** é¡¹ç›®å¤´æ–‡ä»¶ **********/
 `include "cpu.h"
 `include "bus.h"
 `include "rom.h"
@@ -22,105 +22,105 @@
 `include "uart.h"
 `include "gpio.h"
 
-/********** Ä£¿é **********/
+/********** æ¨¡å— **********/
 module chip (
-	/********** Ê±ÖÓÓë¸´Î» **********/
-	input  wire						 clk,		  // Ê±ÖÓ
-	input  wire						 clk_,		  // ·´ÏàÊ±ÖÓ
-	input  wire						 reset		  // ¸´Î»
+	/********** æ—¶é’Ÿä¸å¤ä½ **********/
+	input  wire						 clk,		  // æ—¶é’Ÿ
+	input  wire						 clk_,		  // åç›¸æ—¶é’Ÿ
+	input  wire						 reset		  // å¤ä½
 	/********** UART  **********/
-`ifdef IMPLEMENT_UART //  UARTÊµÏÖ
-	, input	 wire					 uart_rx	  // UART½ÓÊÕĞÅºÅ
-	, output wire					 uart_tx	  // UART·¢ËÍĞÅºÅ
+`ifdef IMPLEMENT_UART //  UARTå®ç°
+	, input	 wire					 uart_rx	  // UARTæ¥æ”¶ä¿¡å·
+	, output wire					 uart_tx	  // UARTå‘é€ä¿¡å·
 `endif
-	/********** Í¨ÓÃI/ O¶Ë¿Ú **********/
-`ifdef IMPLEMENT_GPIO //GPIOÊµÏÖ
-`ifdef GPIO_IN_CH	 // ÊäÈë½Ó¿ÚÊµÏÖ
-	, input wire [`GPIO_IN_CH-1:0]	 gpio_in	  // ÊäÈë½Ó¿Ú
+	/********** é€šç”¨I/ Oç«¯å£ **********/
+`ifdef IMPLEMENT_GPIO //GPIOå®ç°
+`ifdef GPIO_IN_CH	 // è¾“å…¥æ¥å£å®ç°
+	, input wire [`GPIO_IN_CH-1:0]	 gpio_in	  // è¾“å…¥æ¥å£
 `endif
-`ifdef GPIO_OUT_CH	 //  Êä³ö½Ó¿ÚÊµÏÖ
-	, output wire [`GPIO_OUT_CH-1:0] gpio_out	  // Êä³ö½Ó¿Ú
+`ifdef GPIO_OUT_CH	 //  è¾“å‡ºæ¥å£å®ç°
+	, output wire [`GPIO_OUT_CH-1:0] gpio_out	  // è¾“å‡ºæ¥å£
 `endif
-`ifdef GPIO_IO_CH	 // ÊäÈëÊä³ö½Ó¿ÚÊµÏÖ
-	, inout wire [`GPIO_IO_CH-1:0]	 gpio_io	  // ÊäÈëÊä³ö½Ó¿Ú
+`ifdef GPIO_IO_CH	 // è¾“å…¥è¾“å‡ºæ¥å£å®ç°
+	, inout wire [`GPIO_IO_CH-1:0]	 gpio_io	  // è¾“å…¥è¾“å‡ºæ¥å£
 `endif
 `endif
 );
 
-	/********** ×ÜÏßĞÅºÅ **********/
-	// ×ÜÏßÖ÷¿ØĞÅºÅ
-	wire [`WordDataBus] m_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				m_rdy_;					  // ¥ì¥Ç¥£
-	// ×ÜÏßÖ÷¿Ø0
-	wire				m0_req_;				  // ×ÜÏßÇëÇó
-	wire [`WordAddrBus] m0_addr;				  // µØÖ·
-	wire				m0_as_;					  // µØÖ·Ñ¡Í¨
-	wire				m0_rw;					  // ¶Á/Ğ´
-	wire [`WordDataBus] m0_wr_data;				  // Êı¾İ
-	wire				m0_grnt_;				  // ×ÜÏßÊÚÈ¨
-	// ×ÜÏßÖ÷¿Ø1
-	wire				m1_req_;				  // ×ÜÏßÇëÇó
-	wire [`WordAddrBus] m1_addr;				  // µØÖ·
-	wire				m1_as_;					  // µØÖ·Ñ¡Í¨
-	wire				m1_rw;					  // ¶Á/Ğ´
-	wire [`WordDataBus] m1_wr_data;				  // Êı¾İ
-	wire				m1_grnt_;				  // ×ÜÏßÊÚÈ¨
-	// ×ÜÏßÖ÷¿Ø2
-	wire				m2_req_;				  // ×ÜÏßÇëÇó
-	wire [`WordAddrBus] m2_addr;				  // µØÖ·
-	wire				m2_as_;					  // µØÖ·Ñ¡Í¨
-	wire				m2_rw;					  // ¶Á/Ğ´
-	wire [`WordDataBus] m2_wr_data;				  // Êı¾İ
-	wire				m2_grnt_;				  // ×ÜÏßÊÚÈ¨
-	// ×ÜÏßÖ÷¿Ø3
-	wire				m3_req_;				  // ×ÜÏßÇëÇó
-	wire [`WordAddrBus] m3_addr;				  // µØÖ·
-	wire				m3_as_;					  // µØÖ·Ñ¡Í¨
-	wire				m3_rw;					  // ¶Á/Ğ´
-	wire [`WordDataBus] m3_wr_data;				  // Êı¾İ
-	wire				m3_grnt_;				  // ×ÜÏßÊÚÈ¨
-	/********** ×ÜÏß´ÓÉè±¸ĞÅºÅ**********/
-	//ËùÓĞ´ÓÉè±¸¹²ÓÃĞÅºÅ
-	wire [`WordAddrBus] s_addr;					  // µØÖ·
-	wire				s_as_;					  // µØÖ·Ñ¡Í¨
-	wire				s_rw;					  // ¶Á/Ğ´
-	wire [`WordDataBus] s_wr_data;				  // Ğ´ÈëÊı¾İ
-	// 0ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s0_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s0_rdy_;				  // ¾ÍĞ÷
-	wire				s0_cs_;					  // Æ¬Ñ¡
-	// 1ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s1_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s1_rdy_;				  // ¾ÍĞ÷
-	wire				s1_cs_;					  // Æ¬Ñ¡
-	// 2ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s2_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s2_rdy_;				  // ¾ÍĞ÷
-	wire				s2_cs_;					  // Æ¬Ñ¡
-	// 3ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s3_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s3_rdy_;				  // ¾ÍĞ÷
-	wire				s3_cs_;					  // Æ¬Ñ¡
-	// 4ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s4_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s4_rdy_;				  // ¾ÍĞ÷
-	wire				s4_cs_;					  // Æ¬Ñ¡
-	// 5ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s5_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s5_rdy_;				  // ¾ÍĞ÷
-	wire				s5_cs_;					  // Æ¬Ñ¡
-	// 6ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s6_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s6_rdy_;				  // ¾ÍĞ÷
-	wire				s6_cs_;					  // Æ¬Ñ¡
-	// 7ºÅ×ÜÏß´ÓÉè±¸
-	wire [`WordDataBus] s7_rd_data;				  // ¶ÁÈ¡Êı¾İ
-	wire				s7_rdy_;				  // ¾ÍĞ÷
-	wire				s7_cs_;					  // Æ¬Ñ¡
-	/**********ÖĞ¶ÏÇëÇóĞÅºÅ **********/
-	wire				   irq_timer;			  // ¶¨Ê±Æ÷ÖĞ¶Ï
-	wire				   irq_uart_rx;			  // UART IRQ£¨¶ÁÈ¡£©
-	wire				   irq_uart_tx;			  // UART IRQ£¨·¢ËÍ£©
+	/********** æ€»çº¿ä¿¡å· **********/
+	// æ€»çº¿ä¸»æ§ä¿¡å·
+	wire [`WordDataBus] m_rd_data;				  // è¯»å–æ•°æ®
+	wire				m_rdy_;					  // ãƒ¬ãƒ‡ã‚£
+	// æ€»çº¿ä¸»æ§0
+	wire				m0_req_;				  // æ€»çº¿è¯·æ±‚
+	wire [`WordAddrBus] m0_addr;				  // åœ°å€
+	wire				m0_as_;					  // åœ°å€é€‰é€š
+	wire				m0_rw;					  // è¯»/å†™
+	wire [`WordDataBus] m0_wr_data;				  // æ•°æ®
+	wire				m0_grnt_;				  // æ€»çº¿æˆæƒ
+	// æ€»çº¿ä¸»æ§1
+	wire				m1_req_;				  // æ€»çº¿è¯·æ±‚
+	wire [`WordAddrBus] m1_addr;				  // åœ°å€
+	wire				m1_as_;					  // åœ°å€é€‰é€š
+	wire				m1_rw;					  // è¯»/å†™
+	wire [`WordDataBus] m1_wr_data;				  // æ•°æ®
+	wire				m1_grnt_;				  // æ€»çº¿æˆæƒ
+	// æ€»çº¿ä¸»æ§2
+	wire				m2_req_;				  // æ€»çº¿è¯·æ±‚
+	wire [`WordAddrBus] m2_addr;				  // åœ°å€
+	wire				m2_as_;					  // åœ°å€é€‰é€š
+	wire				m2_rw;					  // è¯»/å†™
+	wire [`WordDataBus] m2_wr_data;				  // æ•°æ®
+	wire				m2_grnt_;				  // æ€»çº¿æˆæƒ
+	// æ€»çº¿ä¸»æ§3
+	wire				m3_req_;				  // æ€»çº¿è¯·æ±‚
+	wire [`WordAddrBus] m3_addr;				  // åœ°å€
+	wire				m3_as_;					  // åœ°å€é€‰é€š
+	wire				m3_rw;					  // è¯»/å†™
+	wire [`WordDataBus] m3_wr_data;				  // æ•°æ®
+	wire				m3_grnt_;				  // æ€»çº¿æˆæƒ
+	/********** æ€»çº¿ä»è®¾å¤‡ä¿¡å·**********/
+	//æ‰€æœ‰ä»è®¾å¤‡å…±ç”¨ä¿¡å·
+	wire [`WordAddrBus] s_addr;					  // åœ°å€
+	wire				s_as_;					  // åœ°å€é€‰é€š
+	wire				s_rw;					  // è¯»/å†™
+	wire [`WordDataBus] s_wr_data;				  // å†™å…¥æ•°æ®
+	// 0å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s0_rd_data;				  // è¯»å–æ•°æ®
+	wire				s0_rdy_;				  // å°±ç»ª
+	wire				s0_cs_;					  // ç‰‡é€‰
+	// 1å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s1_rd_data;				  // è¯»å–æ•°æ®
+	wire				s1_rdy_;				  // å°±ç»ª
+	wire				s1_cs_;					  // ç‰‡é€‰
+	// 2å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s2_rd_data;				  // è¯»å–æ•°æ®
+	wire				s2_rdy_;				  // å°±ç»ª
+	wire				s2_cs_;					  // ç‰‡é€‰
+	// 3å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s3_rd_data;				  // è¯»å–æ•°æ®
+	wire				s3_rdy_;				  // å°±ç»ª
+	wire				s3_cs_;					  // ç‰‡é€‰
+	// 4å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s4_rd_data;				  // è¯»å–æ•°æ®
+	wire				s4_rdy_;				  // å°±ç»ª
+	wire				s4_cs_;					  // ç‰‡é€‰
+	// 5å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s5_rd_data;				  // è¯»å–æ•°æ®
+	wire				s5_rdy_;				  // å°±ç»ª
+	wire				s5_cs_;					  // ç‰‡é€‰
+	// 6å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s6_rd_data;				  // è¯»å–æ•°æ®
+	wire				s6_rdy_;				  // å°±ç»ª
+	wire				s6_cs_;					  // ç‰‡é€‰
+	// 7å·æ€»çº¿ä»è®¾å¤‡
+	wire [`WordDataBus] s7_rd_data;				  // è¯»å–æ•°æ®
+	wire				s7_rdy_;				  // å°±ç»ª
+	wire				s7_cs_;					  // ç‰‡é€‰
+	/**********ä¸­æ–­è¯·æ±‚ä¿¡å· **********/
+	wire				   irq_timer;			  // å®šæ—¶å™¨ä¸­æ–­
+	wire				   irq_uart_rx;			  // UART IRQï¼ˆè¯»å–ï¼‰
+	wire				   irq_uart_tx;			  // UART IRQï¼ˆå‘é€ï¼‰
 	wire [`CPU_IRQ_CH-1:0] cpu_irq;				  // CPU IRQ
 
 	assign cpu_irq = {{`CPU_IRQ_CH-3{`LOW}}, 
@@ -128,232 +128,232 @@ module chip (
 
 	/********** CPU **********/
 	cpu cpu (
-		/********** Ê±ÖÓÓë¸´Î» **********/
-		.clk			 (clk),					  // Ê±ÖÓ
-		.clk_			 (clk_),				  // ·´ÏàÊ±ÖÓ
-		.reset			 (reset),				  // ¸´Î»
-		/********** ×ÜÏß½Ó¿Ú **********/
-		// IF Stage Ö¸Áî¶ÁÈ¡--×ÜÏßÖ÷¿Ø0
-		.if_bus_rd_data	 (m_rd_data),			  // ¶Á³öµÄÊı¾İ
-		.if_bus_rdy_	 (m_rdy_),				  // ¾ÍĞ÷
-		.if_bus_grnt_	 (m0_grnt_),			  // ×ÜÏßÊÚÈ¨
-		.if_bus_req_	 (m0_req_),				  // ÇëÇó×ÜÏß
-		.if_bus_addr	 (m0_addr),				  // µØÖ·
-		.if_bus_as_		 (m0_as_),				  // µØÖ·Ñ¡Í¨
-		.if_bus_rw		 (m0_rw),				  // ¶Á/Ğ´
-		.if_bus_wr_data	 (m0_wr_data),			  // Ğ´ÈëµÄÊı¾İ
-		// MEM Stage ÄÚ´æ·ÃÎÊ--×ÜÏßÖ÷¿Ø1
-		.mem_bus_rd_data (m_rd_data),			  // ¶Á³öµÄÊı¾İ
-		.mem_bus_rdy_	 (m_rdy_),				  // ¾ÍĞ÷
-		.mem_bus_grnt_	 (m1_grnt_),			  // ×ÜÏßÊÚÈ¨
-		.mem_bus_req_	 (m1_req_),				  // ÇëÇó×ÜÏß
-		.mem_bus_addr	 (m1_addr),				  // µØÖ·
-		.mem_bus_as_	 (m1_as_),				  // µØÖ·Ñ¡Í¨
-		.mem_bus_rw		 (m1_rw),				  // ¶Á/Ğ´
-		.mem_bus_wr_data (m1_wr_data),			  // Ğ´ÈëµÄÊı¾İ
-		/********** ÖĞ¶Ï **********/
-		.cpu_irq		 (cpu_irq)				  // ÖĞ¶ÏÇëÇó
+		/********** æ—¶é’Ÿä¸å¤ä½ **********/
+		.clk			 (clk),					  // æ—¶é’Ÿ
+		.clk_			 (clk_),				  // åç›¸æ—¶é’Ÿ
+		.reset			 (reset),				  // å¤ä½
+		/********** æ€»çº¿æ¥å£ **********/
+		// IF Stage æŒ‡ä»¤è¯»å–--æ€»çº¿ä¸»æ§0
+		.if_bus_rd_data	 (m_rd_data),			  // è¯»å‡ºçš„æ•°æ®
+		.if_bus_rdy_	 (m_rdy_),				  // å°±ç»ª
+		.if_bus_grnt_	 (m0_grnt_),			  // æ€»çº¿æˆæƒ
+		.if_bus_req_	 (m0_req_),				  // è¯·æ±‚æ€»çº¿
+		.if_bus_addr	 (m0_addr),				  // åœ°å€
+		.if_bus_as_		 (m0_as_),				  // åœ°å€é€‰é€š
+		.if_bus_rw		 (m0_rw),				  // è¯»/å†™
+		.if_bus_wr_data	 (m0_wr_data),			  // å†™å…¥çš„æ•°æ®
+		// MEM Stage å†…å­˜è®¿é—®--æ€»çº¿ä¸»æ§1
+		.mem_bus_rd_data (m_rd_data),			  // è¯»å‡ºçš„æ•°æ®
+		.mem_bus_rdy_	 (m_rdy_),				  // å°±ç»ª
+		.mem_bus_grnt_	 (m1_grnt_),			  // æ€»çº¿æˆæƒ
+		.mem_bus_req_	 (m1_req_),				  // è¯·æ±‚æ€»çº¿
+		.mem_bus_addr	 (m1_addr),				  // åœ°å€
+		.mem_bus_as_	 (m1_as_),				  // åœ°å€é€‰é€š
+		.mem_bus_rw		 (m1_rw),				  // è¯»/å†™
+		.mem_bus_wr_data (m1_wr_data),			  // å†™å…¥çš„æ•°æ®
+		/********** ä¸­æ–­ **********/
+		.cpu_irq		 (cpu_irq)				  // ä¸­æ–­è¯·æ±‚
 	);
 
-	/********** ×ÜÏßÖ÷¿Ø2 : Î´Œg×° **********/
+	/********** æ€»çº¿ä¸»æ§2 : æœªå®Ÿè£… **********/
 	assign m2_addr	  = `WORD_ADDR_W'h0;
 	assign m2_as_	  = `DISABLE_;
 	assign m2_rw	  = `READ;
 	assign m2_wr_data = `WORD_DATA_W'h0;
 	assign m2_req_	  = `DISABLE_;
 
-	/********** ×ÜÏßÖ÷¿Ø 3 : Î´Œg×° **********/
+	/********** æ€»çº¿ä¸»æ§ 3 : æœªå®Ÿè£… **********/
 	assign m3_addr	  = `WORD_ADDR_W'h0;
 	assign m3_as_	  = `DISABLE_;
 	assign m3_rw	  = `READ;
 	assign m3_wr_data = `WORD_DATA_W'h0;
 	assign m3_req_	  = `DISABLE_;
    
-	/********** ×ÜÏß´ÓÉè±¸ 0 : ROM **********/
+	/********** æ€»çº¿ä»è®¾å¤‡ 0 : ROM **********/
 	rom rom (
 		/********** Clock & Reset **********/
-		.clk			 (clk),					  // Ê±ÖÓ
-		.reset			 (reset),				  // Òì²½¸´Î»
-		/**********×ÜÏß½Ó¿Ú **********/
-		.cs_			 (s0_cs_),				  // Æ¬Ñ¡
-		.as_			 (s_as_),				  // µØÖ·Ñ¡Í¨
-		.addr			 (s_addr[`RomAddrLoc]),	  // µØÖ·
-		.rd_data		 (s0_rd_data),			  // ¶Á³öµÄÊı¾İ
-		.rdy_			 (s0_rdy_)				  // ¾ÍĞ÷
+		.clk			 (clk),					  // æ—¶é’Ÿ
+		.reset			 (reset),				  // å¼‚æ­¥å¤ä½
+		/**********æ€»çº¿æ¥å£ **********/
+		.cs_			 (s0_cs_),				  // ç‰‡é€‰
+		.as_			 (s_as_),				  // åœ°å€é€‰é€š
+		.addr			 (s_addr[`RomAddrLoc]),	  // åœ°å€
+		.rd_data		 (s0_rd_data),			  // è¯»å‡ºçš„æ•°æ®
+		.rdy_			 (s0_rdy_)				  // å°±ç»ª
 	);
 
-	/********** ×ÜÏß´ÓÉè±¸ 1 : Scratch Pad Memory£¬±¾·½°¸ÖĞRAM²»Í¨¹ı×ÜÏßÖ±½Ó·½·¨ **********/
+	/********** æ€»çº¿ä»è®¾å¤‡ 1 : Scratch Pad Memoryï¼Œæœ¬æ–¹æ¡ˆä¸­RAMä¸é€šè¿‡æ€»çº¿ç›´æ¥æ–¹æ³• **********/
 	assign s1_rd_data = `WORD_DATA_W'h0;
 	assign s1_rdy_	  = `DISABLE_;
 
-	/********** ×ÜÏß´ÓÉè±¸ 2 : ¶¨Ê±Æ÷ **********/
-`ifdef IMPLEMENT_TIMER // ¶¨Ê±Æ÷Ñ¡×°
+	/********** æ€»çº¿ä»è®¾å¤‡ 2 : å®šæ—¶å™¨ **********/
+`ifdef IMPLEMENT_TIMER // å®šæ—¶å™¨é€‰è£…
 	timer timer (
-		/********** Ê±ÖÓÓë¸´Î» **********/
-		.clk			 (clk),					  // Ê±ÖÓ
-		.reset			 (reset),				  // Òì²½¸´Î»
-		/********** ×ÜÏß½Ó¿Ú **********/
-		.cs_			 (s2_cs_),				  // Æ¬Ñ¡
-		.as_			 (s_as_),				  // µØÖ·Ñ¡Í¨
-		.addr			 (s_addr[`TimerAddrLoc]), // µØÖ·
-		.rw				 (s_rw),				  // ¶Á/Ğ´
-		.wr_data		 (s_wr_data),			  // Ğ´ÈëµÄÊı¾İ
-		.rd_data		 (s2_rd_data),			  // ¶Á³öµÄÊı¾İ
-		.rdy_			 (s2_rdy_),				  // ¾ÍĞ÷
-		/********** ÖĞ¶Ï **********/
-		.irq			 (irq_timer)			  // ¶¨Ê±Æ÷ÖĞ¶ÏÇëÇó
+		/********** æ—¶é’Ÿä¸å¤ä½ **********/
+		.clk			 (clk),					  // æ—¶é’Ÿ
+		.reset			 (reset),				  // å¼‚æ­¥å¤ä½
+		/********** æ€»çº¿æ¥å£ **********/
+		.cs_			 (s2_cs_),				  // ç‰‡é€‰
+		.as_			 (s_as_),				  // åœ°å€é€‰é€š
+		.addr			 (s_addr[`TimerAddrLoc]), // åœ°å€
+		.rw				 (s_rw),				  // è¯»/å†™
+		.wr_data		 (s_wr_data),			  // å†™å…¥çš„æ•°æ®
+		.rd_data		 (s2_rd_data),			  // è¯»å‡ºçš„æ•°æ®
+		.rdy_			 (s2_rdy_),				  // å°±ç»ª
+		/********** ä¸­æ–­ **********/
+		.irq			 (irq_timer)			  // å®šæ—¶å™¨ä¸­æ–­è¯·æ±‚
 	 );
-`else				   // ¶¨Ê±Æ÷Î´Ñ¡×°
+`else				   // å®šæ—¶å™¨æœªé€‰è£…
 	assign s2_rd_data = `WORD_DATA_W'h0;
 	assign s2_rdy_	  = `DISABLE_;
 	assign irq_timer  = `DISABLE;
 `endif
 
-	/********** ×ÜÏß´ÓÉè±¸ 3 : UART **********/
-`ifdef IMPLEMENT_UART // UARTÑ¡×°
+	/********** æ€»çº¿ä»è®¾å¤‡ 3 : UART **********/
+`ifdef IMPLEMENT_UART // UARTé€‰è£…
 	uart uart (
-		/********** Ê±ÖÓÓë¸´Î» **********/
-		.clk			 (clk),					  // Ê±ÖÓ
-		.reset			 (reset),				  // Òì²½¸´Î»
-		/********** ×ÜÏß½Ó¿Ú **********/
-		.cs_			 (s3_cs_),				  // Æ¬Ñ¡
-		.as_			 (s_as_),				  // µØÖ·Ñ¡Í¨
-		.rw				 (s_rw),				  // ¶Á/Ğ´
-		.addr			 (s_addr[`UartAddrLoc]),  //  µØÖ·
-		.wr_data		 (s_wr_data),			  // Ğ´ÈëµÄÊı¾İ
-		.rd_data		 (s3_rd_data),			  // ¶Á³öµÄÊı¾İ
-		.rdy_			 (s3_rdy_),				  // ¾ÍĞ÷
-		/********** ÖĞ¶Ï **********/
-		.irq_rx			 (irq_uart_rx),			  // ½ÓÊÕÍê³ÉÖĞ¶ÏÇëÇó
-		.irq_tx			 (irq_uart_tx),			  // ·¢ËÍÍê³ÉÖĞ¶ÏÇëÇó
-		/********** UARTÊÕ·¢ĞÅºÅ£¬Í¨¹ıFPGAÒı½ÅÎªTTLµçÆ½£¬Èç¹ûÍ¨¹ı´®¿Ú½ÓÔòÎªRS232µçÆ½	**********/
-		.rx				 (uart_rx),				  // UART½ÓÊÕĞÅºÅ£¬Òı½ÅÔ¼ÊøÊ±×¢Òâ
-		.tx				 (uart_tx)				  // UART·¢ËÍĞÅºÅ£¬Òı½ÅÔ¼ÊøÊ±×¢Òâ
+		/********** æ—¶é’Ÿä¸å¤ä½ **********/
+		.clk			 (clk),					  // æ—¶é’Ÿ
+		.reset			 (reset),				  // å¼‚æ­¥å¤ä½
+		/********** æ€»çº¿æ¥å£ **********/
+		.cs_			 (s3_cs_),				  // ç‰‡é€‰
+		.as_			 (s_as_),				  // åœ°å€é€‰é€š
+		.rw				 (s_rw),				  // è¯»/å†™
+		.addr			 (s_addr[`UartAddrLoc]),  //  åœ°å€
+		.wr_data		 (s_wr_data),			  // å†™å…¥çš„æ•°æ®
+		.rd_data		 (s3_rd_data),			  // è¯»å‡ºçš„æ•°æ®
+		.rdy_			 (s3_rdy_),				  // å°±ç»ª
+		/********** ä¸­æ–­ **********/
+		.irq_rx			 (irq_uart_rx),			  // æ¥æ”¶å®Œæˆä¸­æ–­è¯·æ±‚
+		.irq_tx			 (irq_uart_tx),			  // å‘é€å®Œæˆä¸­æ–­è¯·æ±‚
+		/********** UARTæ”¶å‘ä¿¡å·ï¼Œé€šè¿‡FPGAå¼•è„šä¸ºTTLç”µå¹³ï¼Œå¦‚æœé€šè¿‡ä¸²å£æ¥åˆ™ä¸ºRS232ç”µå¹³	**********/
+		.rx				 (uart_rx),				  // UARTæ¥æ”¶ä¿¡å·ï¼Œå¼•è„šçº¦æŸæ—¶æ³¨æ„
+		.tx				 (uart_tx)				  // UARTå‘é€ä¿¡å·ï¼Œå¼•è„šçº¦æŸæ—¶æ³¨æ„
 	);
-`else				  // UARTÎ´Ñ¡×°
+`else				  // UARTæœªé€‰è£…
 	assign s3_rd_data  = `WORD_DATA_W'h0;
 	assign s3_rdy_	   = `DISABLE_;
 	assign irq_uart_rx = `DISABLE;
 	assign irq_uart_tx = `DISABLE;
 `endif
 
-	/********** ×ÜÏß´ÓÉè±¸ 4 : GPIO **********/
-`ifdef IMPLEMENT_GPIO // GPIOÑ¡×°
+	/********** æ€»çº¿ä»è®¾å¤‡ 4 : GPIO **********/
+`ifdef IMPLEMENT_GPIO // GPIOé€‰è£…
 	gpio gpio (
-		/********** Ê±ÖÓÓë¸´Î» **********/
-		.clk			 (clk),					 // Ê±ÖÓ
-		.reset			 (reset),				 // Òì²½¸´Î»
-		/********** ×ÜÏß½Ó¿Ú **********/
-		.cs_			 (s4_cs_),				 // Æ¬Ñ¡
-		.as_			 (s_as_),				 // µØÖ·Ñ¡Í¨
-		.rw				 (s_rw),				 // ¶Á/Ğ´
-		.addr			 (s_addr[`GpioAddrLoc]), // µØÖ·
-		.wr_data		 (s_wr_data),			 // Ğ´ÈëµÄÊı¾İ
-		.rd_data		 (s4_rd_data),			 // ¶Á³öµÄÊı¾İ
-		.rdy_			 (s4_rdy_)				 // ¾ÍĞ÷
-		/********** GPIO ¶Ë¿Ú **********/
-`ifdef GPIO_IN_CH	 // Ñ¡×°ÊäÈë¿Ú
-		, .gpio_in		 (~gpio_in)				 // ÊäÈë¿Ú,zhangly×¢£º±©·ç°åÉÏÒı½ÅÔ¼Êøµ½ËÄ¸ö¸ºÂß¼­µÄ°´Å¥£¬¹ÊÈ¡·´
+		/********** æ—¶é’Ÿä¸å¤ä½ **********/
+		.clk			 (clk),					 // æ—¶é’Ÿ
+		.reset			 (reset),				 // å¼‚æ­¥å¤ä½
+		/********** æ€»çº¿æ¥å£ **********/
+		.cs_			 (s4_cs_),				 // ç‰‡é€‰
+		.as_			 (s_as_),				 // åœ°å€é€‰é€š
+		.rw				 (s_rw),				 // è¯»/å†™
+		.addr			 (s_addr[`GpioAddrLoc]), // åœ°å€
+		.wr_data		 (s_wr_data),			 // å†™å…¥çš„æ•°æ®
+		.rd_data		 (s4_rd_data),			 // è¯»å‡ºçš„æ•°æ®
+		.rdy_			 (s4_rdy_)				 // å°±ç»ª
+		/********** GPIO ç«¯å£ **********/
+`ifdef GPIO_IN_CH	 // é€‰è£…è¾“å…¥å£
+		, .gpio_in		 (~gpio_in)				 // è¾“å…¥å£,zhanglyæ³¨ï¼šæš´é£æ¿ä¸Šå¼•è„šçº¦æŸåˆ°å››ä¸ªè´Ÿé€»è¾‘çš„æŒ‰é’®ï¼Œæ•…å–å
 `endif
-`ifdef GPIO_OUT_CH	 // Ñ¡×°Êä³ö¿Ú
-		, .gpio_out		 (gpio_out)				 // Êä³ö¿Ú
+`ifdef GPIO_OUT_CH	 // é€‰è£…è¾“å‡ºå£
+		, .gpio_out		 (gpio_out)				 // è¾“å‡ºå£
 `endif
-`ifdef GPIO_IO_CH	 // Ñ¡×°ÁËÊäÈëÊä³ö
-		, .gpio_io		 (gpio_io)				 // ÊäÈëÊä³ö¿Ú
+`ifdef GPIO_IO_CH	 // é€‰è£…äº†è¾“å…¥è¾“å‡º
+		, .gpio_io		 (gpio_io)				 // è¾“å…¥è¾“å‡ºå£
 `endif
 	);
-`else				  // GPIOÃ»Ñ¡×°
+`else				  // GPIOæ²¡é€‰è£…
 	assign s4_rd_data = `WORD_DATA_W'h0;
 	assign s4_rdy_	  = `DISABLE_;
 `endif
 
-	/********** ×ÜÏß´ÓÉè±¸ 5 : Ã»Ñ¡×° **********/
+	/********** æ€»çº¿ä»è®¾å¤‡ 5 : æ²¡é€‰è£… **********/
 	assign s5_rd_data = `WORD_DATA_W'h0;
 	assign s5_rdy_	  = `DISABLE_;
   
-	/********** ×ÜÏß´ÓÉè±¸ 6 :  Ã»Ñ¡×° **********/
+	/********** æ€»çº¿ä»è®¾å¤‡ 6 :  æ²¡é€‰è£… **********/
 	assign s6_rd_data = `WORD_DATA_W'h0;
 	assign s6_rdy_	  = `DISABLE_;
   
-	/********** ×ÜÏß´ÓÉè±¸ 7 :  Ã»Ñ¡×° **********/
+	/********** æ€»çº¿ä»è®¾å¤‡ 7 :  æ²¡é€‰è£… **********/
 	assign s7_rd_data = `WORD_DATA_W'h0;
 	assign s7_rdy_	  = `DISABLE_;
 
-	/********** ×ÜÏß **********/
+	/********** æ€»çº¿ **********/
 	bus bus (
-		/********** Ê±ÖÓÓë¸´Î» **********/
-		.clk			 (clk),					 // Ê±ÖÓ
-		.reset			 (reset),				 // Òì²½¸´Î»
-		/********** ×ÜÏßÖ÷¿ØĞÅºÅ **********/
-		// ËùÓĞ×ÜÏßÖ÷¿Ø¹²ÓÃĞÅºÅ
-		.m_rd_data		 (m_rd_data),			 // ¶Á³öµÄÊı¾İ
-		.m_rdy_			 (m_rdy_),				 // ¾ÍĞ÷
-		// 0ºÅ×ÜÏßÖ÷¿Ø
-		.m0_req_		 (m0_req_),				 // ÇëÇó×ÜÏß
-		.m0_addr		 (m0_addr),				 // µØÖ·
-		.m0_as_			 (m0_as_),				 // µØÖ·Ñ¡Í¨
-		.m0_rw			 (m0_rw),				 // ¶Á/Ğ´
-		.m0_wr_data		 (m0_wr_data),			 // Ğ´ÈëµÄÊı¾İ
-		.m0_grnt_		 (m0_grnt_),			 // ×ÜÏßÊÚÈ¨
-		// 1ºÅ×ÜÏßÖ÷¿Ø
-		.m1_req_		 (m1_req_),				 // ¥Ğ¥¹¥ê¥¯¥¨¥¹¥È
-		.m1_addr		 (m1_addr),				 // ¥¢¥É¥ì¥¹
-		.m1_as_			 (m1_as_),				 // ¥¢¥É¥ì¥¹¥¹¥È¥í©`¥Ö
-		.m1_rw			 (m1_rw),				 // Õi¤ß£¯•ø¤­
-		.m1_wr_data		 (m1_wr_data),			 // •ø¤­Şz¤ß¥Ç©`¥¿
-		.m1_grnt_		 (m1_grnt_),			 // ¥Ğ¥¹¥°¥é¥ó¥È
-		// 2ºÅ×ÜÏßÖ÷¿Ø
-		.m2_req_		 (m2_req_),				 // ¥Ğ¥¹¥ê¥¯¥¨¥¹¥È
-		.m2_addr		 (m2_addr),				 // ¥¢¥É¥ì¥¹
-		.m2_as_			 (m2_as_),				 // ¥¢¥É¥ì¥¹¥¹¥È¥í©`¥Ö
-		.m2_rw			 (m2_rw),				 // Õi¤ß£¯•ø¤­
-		.m2_wr_data		 (m2_wr_data),			 // •ø¤­Şz¤ß¥Ç©`¥¿
-		.m2_grnt_		 (m2_grnt_),			 // ¥Ğ¥¹¥°¥é¥ó¥È
-		// 3ºÅ×ÜÏßÖ÷¿Ø
-		.m3_req_		 (m3_req_),				 // ¥Ğ¥¹¥ê¥¯¥¨¥¹¥È
-		.m3_addr		 (m3_addr),				 // ¥¢¥É¥ì¥¹
-		.m3_as_			 (m3_as_),				 // ¥¢¥É¥ì¥¹¥¹¥È¥í©`¥Ö
-		.m3_rw			 (m3_rw),				 // Õi¤ß£¯•ø¤­
-		.m3_wr_data		 (m3_wr_data),			 // •ø¤­Şz¤ß¥Ç©`¥¿
-		.m3_grnt_		 (m3_grnt_),			 // ¥Ğ¥¹¥°¥é¥ó¥È
-		/********** ×ÜÏß´ÓÉè±¸ĞÅºÅ **********/
-		// ËùÓĞ×ÜÏß´ÓÊôÉè±¸¹²ÓÃĞÅºÅ
-		.s_addr			 (s_addr),				 // µØÖ·
-		.s_as_			 (s_as_),				 // µØÖ·Ñ¡Í¨
-		.s_rw			 (s_rw),				 // ¶Á/Ğ´
-		.s_wr_data		 (s_wr_data),			 // Ğ´ÈëµÄÊı¾İ
-		// 0ºÅ×ÜÏß´ÓÊô
-		.s0_rd_data		 (s0_rd_data),			 // ¶Á³öµÄÊı¾İ
-		.s0_rdy_		 (s0_rdy_),				 // ¾ÍĞ÷
-		.s0_cs_			 (s0_cs_),				 // Æ¬Ñ¡
-		// 1ºÅ×ÜÏß´ÓÊô
-		.s1_rd_data		 (s1_rd_data),			 // Õi¤ß³ö¤·¥Ç©`¥¿
-		.s1_rdy_		 (s1_rdy_),				 // ¥ì¥Ç¥£
-		.s1_cs_			 (s1_cs_),				 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-		// 2ºÅ×ÜÏß´ÓÊô
-		.s2_rd_data		 (s2_rd_data),			 // Õi¤ß³ö¤·¥Ç©`¥¿
-		.s2_rdy_		 (s2_rdy_),				 // ¥ì¥Ç¥£
-		.s2_cs_			 (s2_cs_),				 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-		// 3ºÅ×ÜÏß´ÓÊô
-		.s3_rd_data		 (s3_rd_data),			 // Õi¤ß³ö¤·¥Ç©`¥¿
-		.s3_rdy_		 (s3_rdy_),				 // ¥ì¥Ç¥£
-		.s3_cs_			 (s3_cs_),				 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-		// 4ºÅ×ÜÏß´ÓÊô
-		.s4_rd_data		 (s4_rd_data),			 // Õi¤ß³ö¤·¥Ç©`¥¿
-		.s4_rdy_		 (s4_rdy_),				 // ¥ì¥Ç¥£
-		.s4_cs_			 (s4_cs_),				 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-		// 5ºÅ×ÜÏß´ÓÊô
-		.s5_rd_data		 (s5_rd_data),			 // Õi¤ß³ö¤·¥Ç©`¥¿
-		.s5_rdy_		 (s5_rdy_),				 // ¥ì¥Ç¥£
-		.s5_cs_			 (s5_cs_),				 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-		// 6ºÅ×ÜÏß´ÓÊô
-		.s6_rd_data		 (s6_rd_data),			 // Õi¤ß³ö¤·¥Ç©`¥¿
-		.s6_rdy_		 (s6_rdy_),				 // ¥ì¥Ç¥£
-		.s6_cs_			 (s6_cs_),				 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-		// 7ºÅ×ÜÏß´ÓÊô
-		.s7_rd_data		 (s7_rd_data),			 // Õi¤ß³ö¤·¥Ç©`¥¿
-		.s7_rdy_		 (s7_rdy_),				 // ¥ì¥Ç¥£
-		.s7_cs_			 (s7_cs_)				 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
+		/********** æ—¶é’Ÿä¸å¤ä½ **********/
+		.clk			 (clk),					 // æ—¶é’Ÿ
+		.reset			 (reset),				 // å¼‚æ­¥å¤ä½
+		/********** æ€»çº¿ä¸»æ§ä¿¡å· **********/
+		// æ‰€æœ‰æ€»çº¿ä¸»æ§å…±ç”¨ä¿¡å·
+		.m_rd_data		 (m_rd_data),			 // è¯»å‡ºçš„æ•°æ®
+		.m_rdy_			 (m_rdy_),				 // å°±ç»ª
+		// 0å·æ€»çº¿ä¸»æ§
+		.m0_req_		 (m0_req_),				 // è¯·æ±‚æ€»çº¿
+		.m0_addr		 (m0_addr),				 // åœ°å€
+		.m0_as_			 (m0_as_),				 // åœ°å€é€‰é€š
+		.m0_rw			 (m0_rw),				 // è¯»/å†™
+		.m0_wr_data		 (m0_wr_data),			 // å†™å…¥çš„æ•°æ®
+		.m0_grnt_		 (m0_grnt_),			 // æ€»çº¿æˆæƒ
+		// 1å·æ€»çº¿ä¸»æ§
+		.m1_req_		 (m1_req_),				 // ãƒã‚¹ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
+		.m1_addr		 (m1_addr),				 // ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.m1_as_			 (m1_as_),				 // ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¹ãƒˆãƒ­ãƒ¼ãƒ–
+		.m1_rw			 (m1_rw),				 // èª­ã¿ï¼æ›¸ã
+		.m1_wr_data		 (m1_wr_data),			 // æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+		.m1_grnt_		 (m1_grnt_),			 // ãƒã‚¹ã‚°ãƒ©ãƒ³ãƒˆ
+		// 2å·æ€»çº¿ä¸»æ§
+		.m2_req_		 (m2_req_),				 // ãƒã‚¹ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
+		.m2_addr		 (m2_addr),				 // ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.m2_as_			 (m2_as_),				 // ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¹ãƒˆãƒ­ãƒ¼ãƒ–
+		.m2_rw			 (m2_rw),				 // èª­ã¿ï¼æ›¸ã
+		.m2_wr_data		 (m2_wr_data),			 // æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+		.m2_grnt_		 (m2_grnt_),			 // ãƒã‚¹ã‚°ãƒ©ãƒ³ãƒˆ
+		// 3å·æ€»çº¿ä¸»æ§
+		.m3_req_		 (m3_req_),				 // ãƒã‚¹ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
+		.m3_addr		 (m3_addr),				 // ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.m3_as_			 (m3_as_),				 // ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¹ãƒˆãƒ­ãƒ¼ãƒ–
+		.m3_rw			 (m3_rw),				 // èª­ã¿ï¼æ›¸ã
+		.m3_wr_data		 (m3_wr_data),			 // æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+		.m3_grnt_		 (m3_grnt_),			 // ãƒã‚¹ã‚°ãƒ©ãƒ³ãƒˆ
+		/********** æ€»çº¿ä»è®¾å¤‡ä¿¡å· **********/
+		// æ‰€æœ‰æ€»çº¿ä»å±è®¾å¤‡å…±ç”¨ä¿¡å·
+		.s_addr			 (s_addr),				 // åœ°å€
+		.s_as_			 (s_as_),				 // åœ°å€é€‰é€š
+		.s_rw			 (s_rw),				 // è¯»/å†™
+		.s_wr_data		 (s_wr_data),			 // å†™å…¥çš„æ•°æ®
+		// 0å·æ€»çº¿ä»å±
+		.s0_rd_data		 (s0_rd_data),			 // è¯»å‡ºçš„æ•°æ®
+		.s0_rdy_		 (s0_rdy_),				 // å°±ç»ª
+		.s0_cs_			 (s0_cs_),				 // ç‰‡é€‰
+		// 1å·æ€»çº¿ä»å±
+		.s1_rd_data		 (s1_rd_data),			 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.s1_rdy_		 (s1_rdy_),				 // ãƒ¬ãƒ‡ã‚£
+		.s1_cs_			 (s1_cs_),				 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+		// 2å·æ€»çº¿ä»å±
+		.s2_rd_data		 (s2_rd_data),			 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.s2_rdy_		 (s2_rdy_),				 // ãƒ¬ãƒ‡ã‚£
+		.s2_cs_			 (s2_cs_),				 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+		// 3å·æ€»çº¿ä»å±
+		.s3_rd_data		 (s3_rd_data),			 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.s3_rdy_		 (s3_rdy_),				 // ãƒ¬ãƒ‡ã‚£
+		.s3_cs_			 (s3_cs_),				 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+		// 4å·æ€»çº¿ä»å±
+		.s4_rd_data		 (s4_rd_data),			 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.s4_rdy_		 (s4_rdy_),				 // ãƒ¬ãƒ‡ã‚£
+		.s4_cs_			 (s4_cs_),				 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+		// 5å·æ€»çº¿ä»å±
+		.s5_rd_data		 (s5_rd_data),			 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.s5_rdy_		 (s5_rdy_),				 // ãƒ¬ãƒ‡ã‚£
+		.s5_cs_			 (s5_cs_),				 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+		// 6å·æ€»çº¿ä»å±
+		.s6_rd_data		 (s6_rd_data),			 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.s6_rdy_		 (s6_rdy_),				 // ãƒ¬ãƒ‡ã‚£
+		.s6_cs_			 (s6_cs_),				 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+		// 7å·æ€»çº¿ä»å±
+		.s7_rd_data		 (s7_rd_data),			 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.s7_rdy_		 (s7_rdy_),				 // ãƒ¬ãƒ‡ã‚£
+		.s7_cs_			 (s7_cs_)				 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
 	);
 
 endmodule

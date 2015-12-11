@@ -1,4 +1,4 @@
-iverilog ^
+﻿iverilog ^
 	^
 	-D ROM_PRG=\"%1\" ^
 	-D SPM_PRG=\"%2\" ^

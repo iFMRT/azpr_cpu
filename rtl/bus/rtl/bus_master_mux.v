@@ -1,79 +1,79 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: bus_master_mux.v
- -- DESCRIPTION : ×ÜÏßÖ÷¿Ø¶àÂ·¸´ÓÃÆ÷ÊµÏÖ
+ -- DESCRIPTION : æ€»çº¿ä¸»æ§å¤šè·¯å¤ç”¨å™¨å®ç°
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** Í¨ÓÃÍ·ÎÄ¼ş **********/
+/********** é€šç”¨å¤´æ–‡ä»¶ **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** Ä£¿éÍ·ÎÄ¼ş **********/
+/********** æ¨¡å—å¤´æ–‡ä»¶ **********/
 `include "bus.h"
 
-/********** Ä£¿é **********/
+/********** æ¨¡å— **********/
 module bus_master_mux (
-	/********** ÊäÈëÊä³öĞÅºÅ **********/
-	// 0ºÅ×ÜÏßÖ÷¿Ø
-	input  wire [`WordAddrBus] m0_addr,	   // µØÖ·
-	input  wire				   m0_as_,	   // µØÖ·Ñ¡Í¨
-	input  wire				   m0_rw,	   // ¶Á/Ğ´
-	input  wire [`WordDataBus] m0_wr_data, // Ğ´ÈëµÄÊı¾İ
-	input  wire				   m0_grnt_,   // ¸³Óè×ÜÏß
-	// 1ºÅ×ÜÏßÖ÷¿Ø
-	input  wire [`WordAddrBus] m1_addr,	   // µØÖ·
-	input  wire				   m1_as_,	   // µØÖ·Ñ¡Í¨
-	input  wire				   m1_rw,	   // ¶Á/Ğ´
-	input  wire [`WordDataBus] m1_wr_data, // Ğ´ÈëµÄÊı¾İ
-	input  wire				   m1_grnt_,   // ¸³Óè×ÜÏß
-	// 3ºÅ×ÜÏßÖ÷¿Ø
-	input  wire [`WordAddrBus] m2_addr,	   // µØÖ·
-	input  wire				   m2_as_,	   // µØÖ·Ñ¡Í¨
-	input  wire				   m2_rw,	   // ¶Á/Ğ´
-	input  wire [`WordDataBus] m2_wr_data, // Ğ´ÈëµÄÊı¾İ
-	input  wire				   m2_grnt_,   // ¸³Óè×ÜÏß
-	// 3ºÅ×ÜÏßÖ÷¿Ø
-	input  wire [`WordAddrBus] m3_addr,	   // µØÖ·
-	input  wire				   m3_as_,	   // µØÖ·Ñ¡Í¨
-	input  wire				   m3_rw,	   // ¶Á/Ğ´
-	input  wire [`WordDataBus] m3_wr_data, // Ğ´ÈëµÄÊı¾İ
-	input  wire				   m3_grnt_,   // ¸³Óè×ÜÏß
-	/********** ¹²ÏíĞÅºÅ×ÜÏß´ÓÊô **********/
-	output reg	[`WordAddrBus] s_addr,	   // µØÖ·
-	output reg				   s_as_,	   // µØÖ·Ñ¡Í¨
-	output reg				   s_rw,	   // ¶Á/Ğ´
-	output reg	[`WordDataBus] s_wr_data   // Ğ´ÈëµÄÊı¾İ
+	/********** è¾“å…¥è¾“å‡ºä¿¡å· **********/
+	// 0å·æ€»çº¿ä¸»æ§
+	input  wire [`WordAddrBus] m0_addr,	   // åœ°å€
+	input  wire				   m0_as_,	   // åœ°å€é€‰é€š
+	input  wire				   m0_rw,	   // è¯»/å†™
+	input  wire [`WordDataBus] m0_wr_data, // å†™å…¥çš„æ•°æ®
+	input  wire				   m0_grnt_,   // èµ‹äºˆæ€»çº¿
+	// 1å·æ€»çº¿ä¸»æ§
+	input  wire [`WordAddrBus] m1_addr,	   // åœ°å€
+	input  wire				   m1_as_,	   // åœ°å€é€‰é€š
+	input  wire				   m1_rw,	   // è¯»/å†™
+	input  wire [`WordDataBus] m1_wr_data, // å†™å…¥çš„æ•°æ®
+	input  wire				   m1_grnt_,   // èµ‹äºˆæ€»çº¿
+	// 3å·æ€»çº¿ä¸»æ§
+	input  wire [`WordAddrBus] m2_addr,	   // åœ°å€
+	input  wire				   m2_as_,	   // åœ°å€é€‰é€š
+	input  wire				   m2_rw,	   // è¯»/å†™
+	input  wire [`WordDataBus] m2_wr_data, // å†™å…¥çš„æ•°æ®
+	input  wire				   m2_grnt_,   // èµ‹äºˆæ€»çº¿
+	// 3å·æ€»çº¿ä¸»æ§
+	input  wire [`WordAddrBus] m3_addr,	   // åœ°å€
+	input  wire				   m3_as_,	   // åœ°å€é€‰é€š
+	input  wire				   m3_rw,	   // è¯»/å†™
+	input  wire [`WordDataBus] m3_wr_data, // å†™å…¥çš„æ•°æ®
+	input  wire				   m3_grnt_,   // èµ‹äºˆæ€»çº¿
+	/********** å…±äº«ä¿¡å·æ€»çº¿ä»å± **********/
+	output reg	[`WordAddrBus] s_addr,	   // åœ°å€
+	output reg				   s_as_,	   // åœ°å€é€‰é€š
+	output reg				   s_rw,	   // è¯»/å†™
+	output reg	[`WordDataBus] s_wr_data   // å†™å…¥çš„æ•°æ®
 );
 
-	/********** ×ÜÏßÖ÷¿Ø¶àÂ·¸´ÓÃÆ÷ **********/
+	/********** æ€»çº¿ä¸»æ§å¤šè·¯å¤ç”¨å™¨ **********/
 	always @(*) begin
-		/* Ñ¡Ôñ³ÖÓĞ×ÜÏßÊ¹ÓÃÈ¨µÄÖ÷¿Ø */
-		if (m0_grnt_ == `ENABLE_) begin			 // 0ºÅ×ÜÏß×Ü¿Ø
+		/* é€‰æ‹©æŒæœ‰æ€»çº¿ä½¿ç”¨æƒçš„ä¸»æ§ */
+		if (m0_grnt_ == `ENABLE_) begin			 // 0å·æ€»çº¿æ€»æ§
 			s_addr	  = m0_addr;
 			s_as_	  = m0_as_;
 			s_rw	  = m0_rw;
 			s_wr_data = m0_wr_data;
-		end else if (m1_grnt_ == `ENABLE_) begin // 1ºÅ×ÜÏß×Ü¿Ø
+		end else if (m1_grnt_ == `ENABLE_) begin // 1å·æ€»çº¿æ€»æ§
 			s_addr	  = m1_addr;
 			s_as_	  = m1_as_;
 			s_rw	  = m1_rw;
 			s_wr_data = m1_wr_data;
-		end else if (m2_grnt_ == `ENABLE_) begin // 2ºÅ×ÜÏß×Ü¿Ø
+		end else if (m2_grnt_ == `ENABLE_) begin // 2å·æ€»çº¿æ€»æ§
 			s_addr	  = m2_addr;
 			s_as_	  = m2_as_;
 			s_rw	  = m2_rw;
 			s_wr_data = m2_wr_data;
-		end else if (m3_grnt_ == `ENABLE_) begin // 3ºÅ×ÜÏß×Ü¿Ø
+		end else if (m3_grnt_ == `ENABLE_) begin // 3å·æ€»çº¿æ€»æ§
 			s_addr	  = m3_addr;
 			s_as_	  = m3_as_;
 			s_rw	  = m3_rw;
 			s_wr_data = m3_wr_data;
-		end else begin							 // Ä¬ÈÏÖµ
+		end else begin							 // é»˜è®¤å€¼
 			s_addr	  = `WORD_ADDR_W'h0;
 			s_as_	  = `DISABLE_;
 			s_rw	  = `READ;

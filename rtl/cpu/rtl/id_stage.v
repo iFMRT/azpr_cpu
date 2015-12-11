@@ -1,160 +1,160 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: id_stage.v
- -- DESCRIPTION : ID¥¹¥Æ©`¥¸
+ -- DESCRIPTION : IDã‚¹ãƒ†ãƒ¼ã‚¸
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** ¹²Í¨¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å…±é€šãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "nettype.h"
 `include "global_config.h"
 `include "stddef.h"
 
-/********** ‚€„e¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å€‹åˆ¥ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "isa.h"
 `include "cpu.h"
 
-/********** ¥â¥¸¥å©`¥ë **********/
+/********** ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ« **********/
 module id_stage (
-	/********** ¥¯¥í¥Ã¥¯ & ¥ê¥»¥Ã¥È **********/
-	input  wire					 clk,			 // ¥¯¥í¥Ã¥¯
-	input  wire					 reset,			 // ·ÇÍ¬ÆÚ¥ê¥»¥Ã¥È
-	/********** GPR¥¤¥ó¥¿¥Õ¥§©`¥¹ **********/
-	input  wire [`WordDataBus]	 gpr_rd_data_0,	 // Õi¤ß³ö¤·¥Ç©`¥¿ 0
-	input  wire [`WordDataBus]	 gpr_rd_data_1,	 // Õi¤ß³ö¤·¥Ç©`¥¿ 1
-	output wire [`RegAddrBus]	 gpr_rd_addr_0,	 // Õi¤ß³ö¤·¥¢¥É¥ì¥¹ 0
-	output wire [`RegAddrBus]	 gpr_rd_addr_1,	 // Õi¤ß³ö¤·¥¢¥É¥ì¥¹ 1
-	/********** ¥Õ¥©¥ï©`¥Ç¥£¥ó¥° **********/
-	// EX¥¹¥Æ©`¥¸¤«¤é¤Î¥Õ¥©¥ï©`¥Ç¥£¥ó¥°
-	input  wire					 ex_en,			// ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-	input  wire [`WordDataBus]	 ex_fwd_data,	 // ¥Õ¥©¥ï©`¥Ç¥£¥ó¥°¥Ç©`¥¿
-	input  wire [`RegAddrBus]	 ex_dst_addr,	 // •ø¤­Şz¤ß¥¢¥É¥ì¥¹
-	input  wire					 ex_gpr_we_,	 // •ø¤­Şz¤ßÓĞ„¿
-	// MEM¥¹¥Æ©`¥¸¤«¤é¤Î¥Õ¥©¥ï©`¥Ç¥£¥ó¥°
-	input  wire [`WordDataBus]	 mem_fwd_data,	 // ¥Õ¥©¥ï©`¥Ç¥£¥ó¥°¥Ç©`¥¿
-	/********** ÖÆÓù¥ì¥¸¥¹¥¿¥¤¥ó¥¿¥Õ¥§©`¥¹ **********/
-	input  wire [`CpuExeModeBus] exe_mode,		 // ŒgĞĞ¥â©`¥É
-	input  wire [`WordDataBus]	 creg_rd_data,	 // Õi¤ß³ö¤·¥Ç©`¥¿
-	output wire [`RegAddrBus]	 creg_rd_addr,	 // Õi¤ß³ö¤·¥¢¥É¥ì¥¹
-	/********** ¥Ñ¥¤¥×¥é¥¤¥óÖÆÓùĞÅºÅ **********/
-	input  wire					 stall,			 // ¥¹¥È©`¥ë
-	input  wire					 flush,			 // ¥Õ¥é¥Ã¥·¥å
-	output wire [`WordAddrBus]	 br_addr,		 // ·Öáª¥¢¥É¥ì¥¹
-	output wire					 br_taken,		 // ·Öáª¤Î³ÉÁ¢
-	output wire					 ld_hazard,		 // ¥í©`¥É¥Ï¥¶©`¥É
-	/********** IF/ID¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
-	input  wire [`WordAddrBus]	 if_pc,			 // ¥×¥í¥°¥é¥à¥«¥¦¥ó¥¿
-	input  wire [`WordDataBus]	 if_insn,		 // ÃüÁî
-	input  wire					 if_en,			 // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-	/********** ID/EX¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
-	output wire [`WordAddrBus]	 id_pc,			 // ¥×¥í¥°¥é¥à¥«¥¦¥ó¥¿
-	output wire					 id_en,			 // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-	output wire [`AluOpBus]		 id_alu_op,		 // ALU¥ª¥Ú¥ì©`¥·¥ç¥ó
-	output wire [`WordDataBus]	 id_alu_in_0,	 // ALUÈëÁ¦ 0
-	output wire [`WordDataBus]	 id_alu_in_1,	 // ALUÈëÁ¦ 1
-	output wire					 id_br_flag,	 // ·Öáª¥Õ¥é¥°
-	output wire [`MemOpBus]		 id_mem_op,		 // ¥á¥â¥ê¥ª¥Ú¥ì©`¥·¥ç¥ó
-	output wire [`WordDataBus]	 id_mem_wr_data, // ¥á¥â¥ê•ø¤­Şz¤ß¥Ç©`¥¿
-	output wire [`CtrlOpBus]	 id_ctrl_op,	 // ÖÆÓù¥ª¥Ú¥ì©`¥·¥ç¥ó
-	output wire [`RegAddrBus]	 id_dst_addr,	 // GPR•ø¤­Şz¤ß¥¢¥É¥ì¥¹
-	output wire					 id_gpr_we_,	 // GPR•ø¤­Şz¤ßÓĞ„¿
-	output wire [`IsaExpBus]	 id_exp_code	 // ÀıÍâ¥³©`¥É
+	/********** ã‚¯ãƒ­ãƒƒã‚¯ & ãƒªã‚»ãƒƒãƒˆ **********/
+	input  wire					 clk,			 // ã‚¯ãƒ­ãƒƒã‚¯
+	input  wire					 reset,			 // éåŒæœŸãƒªã‚»ãƒƒãƒˆ
+	/********** GPRã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ **********/
+	input  wire [`WordDataBus]	 gpr_rd_data_0,	 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿ 0
+	input  wire [`WordDataBus]	 gpr_rd_data_1,	 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿ 1
+	output wire [`RegAddrBus]	 gpr_rd_addr_0,	 // èª­ã¿å‡ºã—ã‚¢ãƒ‰ãƒ¬ã‚¹ 0
+	output wire [`RegAddrBus]	 gpr_rd_addr_1,	 // èª­ã¿å‡ºã—ã‚¢ãƒ‰ãƒ¬ã‚¹ 1
+	/********** ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚° **********/
+	// EXã‚¹ãƒ†ãƒ¼ã‚¸ã‹ã‚‰ã®ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°
+	input  wire					 ex_en,			// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+	input  wire [`WordDataBus]	 ex_fwd_data,	 // ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿
+	input  wire [`RegAddrBus]	 ex_dst_addr,	 // æ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+	input  wire					 ex_gpr_we_,	 // æ›¸ãè¾¼ã¿æœ‰åŠ¹
+	// MEMã‚¹ãƒ†ãƒ¼ã‚¸ã‹ã‚‰ã®ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°
+	input  wire [`WordDataBus]	 mem_fwd_data,	 // ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿
+	/********** åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ **********/
+	input  wire [`CpuExeModeBus] exe_mode,		 // å®Ÿè¡Œãƒ¢ãƒ¼ãƒ‰
+	input  wire [`WordDataBus]	 creg_rd_data,	 // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+	output wire [`RegAddrBus]	 creg_rd_addr,	 // èª­ã¿å‡ºã—ã‚¢ãƒ‰ãƒ¬ã‚¹
+	/********** ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³åˆ¶å¾¡ä¿¡å· **********/
+	input  wire					 stall,			 // ã‚¹ãƒˆãƒ¼ãƒ«
+	input  wire					 flush,			 // ãƒ•ãƒ©ãƒƒã‚·ãƒ¥
+	output wire [`WordAddrBus]	 br_addr,		 // åˆ†å²ã‚¢ãƒ‰ãƒ¬ã‚¹
+	output wire					 br_taken,		 // åˆ†å²ã®æˆç«‹
+	output wire					 ld_hazard,		 // ãƒ­ãƒ¼ãƒ‰ãƒã‚¶ãƒ¼ãƒ‰
+	/********** IF/IDãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
+	input  wire [`WordAddrBus]	 if_pc,			 // ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿
+	input  wire [`WordDataBus]	 if_insn,		 // å‘½ä»¤
+	input  wire					 if_en,			 // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+	/********** ID/EXãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
+	output wire [`WordAddrBus]	 id_pc,			 // ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿
+	output wire					 id_en,			 // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+	output wire [`AluOpBus]		 id_alu_op,		 // ALUã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	output wire [`WordDataBus]	 id_alu_in_0,	 // ALUå…¥åŠ› 0
+	output wire [`WordDataBus]	 id_alu_in_1,	 // ALUå…¥åŠ› 1
+	output wire					 id_br_flag,	 // åˆ†å²ãƒ•ãƒ©ã‚°
+	output wire [`MemOpBus]		 id_mem_op,		 // ãƒ¡ãƒ¢ãƒªã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	output wire [`WordDataBus]	 id_mem_wr_data, // ãƒ¡ãƒ¢ãƒªæ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+	output wire [`CtrlOpBus]	 id_ctrl_op,	 // åˆ¶å¾¡ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	output wire [`RegAddrBus]	 id_dst_addr,	 // GPRæ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+	output wire					 id_gpr_we_,	 // GPRæ›¸ãè¾¼ã¿æœ‰åŠ¹
+	output wire [`IsaExpBus]	 id_exp_code	 // ä¾‹å¤–ã‚³ãƒ¼ãƒ‰
 );
 
-	/********** ¥Ç¥³©`¥ÉĞÅºÅ **********/
-	wire  [`AluOpBus]			 alu_op;		 // ALU¥ª¥Ú¥ì©`¥·¥ç¥ó
-	wire  [`WordDataBus]		 alu_in_0;		 // ALUÈëÁ¦ 0
-	wire  [`WordDataBus]		 alu_in_1;		 // ALUÈëÁ¦ 1
-	wire						 br_flag;		 // ·Öáª¥Õ¥é¥°
-	wire  [`MemOpBus]			 mem_op;		 // ¥á¥â¥ê¥ª¥Ú¥ì©`¥·¥ç¥ó
-	wire  [`WordDataBus]		 mem_wr_data;	 // ¥á¥â¥ê•ø¤­Şz¤ß¥Ç©`¥¿
-	wire  [`CtrlOpBus]			 ctrl_op;		 // ÖÆÓù¥ª¥Ú¥ì©`¥·¥ç¥ó
-	wire  [`RegAddrBus]			 dst_addr;		 // GPR•ø¤­Şz¤ß¥¢¥É¥ì¥¹
-	wire						 gpr_we_;		 // GPR•ø¤­Şz¤ßÓĞ„¿
-	wire  [`IsaExpBus]			 exp_code;		 // ÀıÍâ¥³©`¥É
+	/********** ãƒ‡ã‚³ãƒ¼ãƒ‰ä¿¡å· **********/
+	wire  [`AluOpBus]			 alu_op;		 // ALUã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	wire  [`WordDataBus]		 alu_in_0;		 // ALUå…¥åŠ› 0
+	wire  [`WordDataBus]		 alu_in_1;		 // ALUå…¥åŠ› 1
+	wire						 br_flag;		 // åˆ†å²ãƒ•ãƒ©ã‚°
+	wire  [`MemOpBus]			 mem_op;		 // ãƒ¡ãƒ¢ãƒªã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	wire  [`WordDataBus]		 mem_wr_data;	 // ãƒ¡ãƒ¢ãƒªæ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+	wire  [`CtrlOpBus]			 ctrl_op;		 // åˆ¶å¾¡ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	wire  [`RegAddrBus]			 dst_addr;		 // GPRæ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+	wire						 gpr_we_;		 // GPRæ›¸ãè¾¼ã¿æœ‰åŠ¹
+	wire  [`IsaExpBus]			 exp_code;		 // ä¾‹å¤–ã‚³ãƒ¼ãƒ‰
 
-	/********** ¥Ç¥³©`¥À **********/
+	/********** ãƒ‡ã‚³ãƒ¼ãƒ€ **********/
 	decoder decoder (
-		/********** IF/ID¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
-		.if_pc			(if_pc),		  // ¥×¥í¥°¥é¥à¥«¥¦¥ó¥¿
-		.if_insn		(if_insn),		  // ÃüÁî
-		.if_en			(if_en),		  // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-		/********** GPR¥¤¥ó¥¿¥Õ¥§©`¥¹ **********/
-		.gpr_rd_data_0	(gpr_rd_data_0),  // Õi¤ß³ö¤·¥Ç©`¥¿ 0
-		.gpr_rd_data_1	(gpr_rd_data_1),  // Õi¤ß³ö¤·¥Ç©`¥¿ 1
-		.gpr_rd_addr_0	(gpr_rd_addr_0),  // Õi¤ß³ö¤·¥¢¥É¥ì¥¹ 0
-		.gpr_rd_addr_1	(gpr_rd_addr_1),  // Õi¤ß³ö¤·¥¢¥É¥ì¥¹ 1
-		/********** ¥Õ¥©¥ï©`¥Ç¥£¥ó¥° **********/
-		// ID¥¹¥Æ©`¥¸¤«¤é¤Î¥Õ¥©¥ï©`¥Ç¥£¥ó¥°
-		.id_en			(id_en),		  // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-		.id_dst_addr	(id_dst_addr),	  // •ø¤­Şz¤ß¥¢¥É¥ì¥¹
-		.id_gpr_we_		(id_gpr_we_),	  // •ø¤­Şz¤ßÓĞ„¿
-		.id_mem_op		(id_mem_op),	  // ¥á¥â¥ê¥ª¥Ú¥ì©`¥·¥ç¥ó
-		// EX¥¹¥Æ©`¥¸¤«¤é¤Î¥Õ¥©¥ï©`¥Ç¥£¥ó¥°
-		.ex_en			(ex_en),		  // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-		.ex_fwd_data	(ex_fwd_data),	  // ¥Õ¥©¥ï©`¥Ç¥£¥ó¥°¥Ç©`¥¿
-		.ex_dst_addr	(ex_dst_addr),	  // •ø¤­Şz¤ß¥¢¥É¥ì¥¹
-		.ex_gpr_we_		(ex_gpr_we_),	  // •ø¤­Şz¤ßÓĞ„¿
-		// MEM¥¹¥Æ©`¥¸¤«¤é¤Î¥Õ¥©¥ï©`¥Ç¥£¥ó¥°
-		.mem_fwd_data	(mem_fwd_data),	  // ¥Õ¥©¥ï©`¥Ç¥£¥ó¥°¥Ç©`¥¿
-		/********** ÖÆÓù¥ì¥¸¥¹¥¿¥¤¥ó¥¿¥Õ¥§©`¥¹ **********/
-		.exe_mode		(exe_mode),		  // ŒgĞĞ¥â©`¥É
-		.creg_rd_data	(creg_rd_data),	  // Õi¤ß³ö¤·¥Ç©`¥¿
-		.creg_rd_addr	(creg_rd_addr),	  // Õi¤ß³ö¤·¥¢¥É¥ì¥¹
-		/********** ¥Ç¥³©`¥ÉĞÅºÅ **********/
-		.alu_op			(alu_op),		  // ALU¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.alu_in_0		(alu_in_0),		  // ALUÈëÁ¦ 0
-		.alu_in_1		(alu_in_1),		  // ALUÈëÁ¦ 1
-		.br_addr		(br_addr),		  // ·Öáª¥¢¥É¥ì¥¹
-		.br_taken		(br_taken),		  // ·Öáª¤Î³ÉÁ¢
-		.br_flag		(br_flag),		  // ·Öáª¥Õ¥é¥°
-		.mem_op			(mem_op),		  // ¥á¥â¥ê¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.mem_wr_data	(mem_wr_data),	  // ¥á¥â¥ê•ø¤­Şz¤ß¥Ç©`¥¿
-		.ctrl_op		(ctrl_op),		  // ÖÆÓù¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.dst_addr		(dst_addr),		  // šøÓÃ¥ì¥¸¥¹¥¿•ø¤­Şz¤ß¥¢¥É¥ì¥¹
-		.gpr_we_		(gpr_we_),		  // šøÓÃ¥ì¥¸¥¹¥¿•ø¤­Şz¤ßÓĞ„¿
-		.exp_code		(exp_code),		  // ÀıÍâ¥³©`¥É
-		.ld_hazard		(ld_hazard)		  // ¥í©`¥É¥Ï¥¶©`¥É
+		/********** IF/IDãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
+		.if_pc			(if_pc),		  // ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿
+		.if_insn		(if_insn),		  // å‘½ä»¤
+		.if_en			(if_en),		  // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+		/********** GPRã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ **********/
+		.gpr_rd_data_0	(gpr_rd_data_0),  // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿ 0
+		.gpr_rd_data_1	(gpr_rd_data_1),  // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿ 1
+		.gpr_rd_addr_0	(gpr_rd_addr_0),  // èª­ã¿å‡ºã—ã‚¢ãƒ‰ãƒ¬ã‚¹ 0
+		.gpr_rd_addr_1	(gpr_rd_addr_1),  // èª­ã¿å‡ºã—ã‚¢ãƒ‰ãƒ¬ã‚¹ 1
+		/********** ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚° **********/
+		// IDã‚¹ãƒ†ãƒ¼ã‚¸ã‹ã‚‰ã®ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°
+		.id_en			(id_en),		  // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+		.id_dst_addr	(id_dst_addr),	  // æ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.id_gpr_we_		(id_gpr_we_),	  // æ›¸ãè¾¼ã¿æœ‰åŠ¹
+		.id_mem_op		(id_mem_op),	  // ãƒ¡ãƒ¢ãƒªã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		// EXã‚¹ãƒ†ãƒ¼ã‚¸ã‹ã‚‰ã®ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°
+		.ex_en			(ex_en),		  // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+		.ex_fwd_data	(ex_fwd_data),	  // ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿
+		.ex_dst_addr	(ex_dst_addr),	  // æ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.ex_gpr_we_		(ex_gpr_we_),	  // æ›¸ãè¾¼ã¿æœ‰åŠ¹
+		// MEMã‚¹ãƒ†ãƒ¼ã‚¸ã‹ã‚‰ã®ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°
+		.mem_fwd_data	(mem_fwd_data),	  // ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿
+		/********** åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ **********/
+		.exe_mode		(exe_mode),		  // å®Ÿè¡Œãƒ¢ãƒ¼ãƒ‰
+		.creg_rd_data	(creg_rd_data),	  // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+		.creg_rd_addr	(creg_rd_addr),	  // èª­ã¿å‡ºã—ã‚¢ãƒ‰ãƒ¬ã‚¹
+		/********** ãƒ‡ã‚³ãƒ¼ãƒ‰ä¿¡å· **********/
+		.alu_op			(alu_op),		  // ALUã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.alu_in_0		(alu_in_0),		  // ALUå…¥åŠ› 0
+		.alu_in_1		(alu_in_1),		  // ALUå…¥åŠ› 1
+		.br_addr		(br_addr),		  // åˆ†å²ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.br_taken		(br_taken),		  // åˆ†å²ã®æˆç«‹
+		.br_flag		(br_flag),		  // åˆ†å²ãƒ•ãƒ©ã‚°
+		.mem_op			(mem_op),		  // ãƒ¡ãƒ¢ãƒªã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.mem_wr_data	(mem_wr_data),	  // ãƒ¡ãƒ¢ãƒªæ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+		.ctrl_op		(ctrl_op),		  // åˆ¶å¾¡ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.dst_addr		(dst_addr),		  // æ±ç”¨ãƒ¬ã‚¸ã‚¹ã‚¿æ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.gpr_we_		(gpr_we_),		  // æ±ç”¨ãƒ¬ã‚¸ã‚¹ã‚¿æ›¸ãè¾¼ã¿æœ‰åŠ¹
+		.exp_code		(exp_code),		  // ä¾‹å¤–ã‚³ãƒ¼ãƒ‰
+		.ld_hazard		(ld_hazard)		  // ãƒ­ãƒ¼ãƒ‰ãƒã‚¶ãƒ¼ãƒ‰
 	);
 
-	/********** ¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
+	/********** ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
 	id_reg id_reg (
-		/********** ¥¯¥í¥Ã¥¯ & ¥ê¥»¥Ã¥È **********/
-		.clk			(clk),			  // ¥¯¥í¥Ã¥¯
-		.reset			(reset),		  // ·ÇÍ¬ÆÚ¥ê¥»¥Ã¥È
-		/********** ¥Ç¥³©`¥É½Y¹û **********/
-		.alu_op			(alu_op),		  // ALU¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.alu_in_0		(alu_in_0),		  // ALUÈëÁ¦ 0
-		.alu_in_1		(alu_in_1),		  // ALUÈëÁ¦ 1
-		.br_flag		(br_flag),		  // ·Öáª¥Õ¥é¥°
-		.mem_op			(mem_op),		  // ¥á¥â¥ê¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.mem_wr_data	(mem_wr_data),	  // ¥á¥â¥ê•ø¤­Şz¤ß¥Ç©`¥¿
-		.ctrl_op		(ctrl_op),		  // ÖÆÓù¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.dst_addr		(dst_addr),		  // šøÓÃ¥ì¥¸¥¹¥¿•ø¤­Şz¤ß¥¢¥É¥ì¥¹
-		.gpr_we_		(gpr_we_),		  // šøÓÃ¥ì¥¸¥¹¥¿•ø¤­Şz¤ßÓĞ„¿
-		.exp_code		(exp_code),		  // ÀıÍâ¥³©`¥É
-		/********** ¥Ñ¥¤¥×¥é¥¤¥óÖÆÓùĞÅºÅ **********/
-		.stall			(stall),		  // ¥¹¥È©`¥ë
-		.flush			(flush),		  // ¥Õ¥é¥Ã¥·¥å
-		/********** IF/ID¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
-		.if_pc			(if_pc),		  // ¥×¥í¥°¥é¥à¥«¥¦¥ó¥¿
-		.if_en			(if_en),		  // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-		/********** ID/EX¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
-		.id_pc			(id_pc),		  // ¥×¥í¥°¥é¥à¥«¥¦¥ó¥¿
-		.id_en			(id_en),		  // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-		.id_alu_op		(id_alu_op),	  // ALU¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.id_alu_in_0	(id_alu_in_0),	  // ALUÈëÁ¦ 0
-		.id_alu_in_1	(id_alu_in_1),	  // ALUÈëÁ¦ 1
-		.id_br_flag		(id_br_flag),	  // ·Öáª¥Õ¥é¥°
-		.id_mem_op		(id_mem_op),	  // ¥á¥â¥ê¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.id_mem_wr_data (id_mem_wr_data), // ¥á¥â¥ê•ø¤­Şz¤ß¥Ç©`¥¿
-		.id_ctrl_op		(id_ctrl_op),	  // ÖÆÓù¥ª¥Ú¥ì©`¥·¥ç¥ó
-		.id_dst_addr	(id_dst_addr),	  // šøÓÃ¥ì¥¸¥¹¥¿•ø¤­Şz¤ß¥¢¥É¥ì¥¹
-		.id_gpr_we_		(id_gpr_we_),	  // šøÓÃ¥ì¥¸¥¹¥¿•ø¤­Şz¤ßÓĞ„¿
-		.id_exp_code	(id_exp_code)	  // ÀıÍâ¥³©`¥É
+		/********** ã‚¯ãƒ­ãƒƒã‚¯ & ãƒªã‚»ãƒƒãƒˆ **********/
+		.clk			(clk),			  // ã‚¯ãƒ­ãƒƒã‚¯
+		.reset			(reset),		  // éåŒæœŸãƒªã‚»ãƒƒãƒˆ
+		/********** ãƒ‡ã‚³ãƒ¼ãƒ‰çµæœ **********/
+		.alu_op			(alu_op),		  // ALUã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.alu_in_0		(alu_in_0),		  // ALUå…¥åŠ› 0
+		.alu_in_1		(alu_in_1),		  // ALUå…¥åŠ› 1
+		.br_flag		(br_flag),		  // åˆ†å²ãƒ•ãƒ©ã‚°
+		.mem_op			(mem_op),		  // ãƒ¡ãƒ¢ãƒªã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.mem_wr_data	(mem_wr_data),	  // ãƒ¡ãƒ¢ãƒªæ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+		.ctrl_op		(ctrl_op),		  // åˆ¶å¾¡ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.dst_addr		(dst_addr),		  // æ±ç”¨ãƒ¬ã‚¸ã‚¹ã‚¿æ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.gpr_we_		(gpr_we_),		  // æ±ç”¨ãƒ¬ã‚¸ã‚¹ã‚¿æ›¸ãè¾¼ã¿æœ‰åŠ¹
+		.exp_code		(exp_code),		  // ä¾‹å¤–ã‚³ãƒ¼ãƒ‰
+		/********** ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³åˆ¶å¾¡ä¿¡å· **********/
+		.stall			(stall),		  // ã‚¹ãƒˆãƒ¼ãƒ«
+		.flush			(flush),		  // ãƒ•ãƒ©ãƒƒã‚·ãƒ¥
+		/********** IF/IDãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
+		.if_pc			(if_pc),		  // ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿
+		.if_en			(if_en),		  // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+		/********** ID/EXãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
+		.id_pc			(id_pc),		  // ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿
+		.id_en			(id_en),		  // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+		.id_alu_op		(id_alu_op),	  // ALUã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.id_alu_in_0	(id_alu_in_0),	  // ALUå…¥åŠ› 0
+		.id_alu_in_1	(id_alu_in_1),	  // ALUå…¥åŠ› 1
+		.id_br_flag		(id_br_flag),	  // åˆ†å²ãƒ•ãƒ©ã‚°
+		.id_mem_op		(id_mem_op),	  // ãƒ¡ãƒ¢ãƒªã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.id_mem_wr_data (id_mem_wr_data), // ãƒ¡ãƒ¢ãƒªæ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+		.id_ctrl_op		(id_ctrl_op),	  // åˆ¶å¾¡ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+		.id_dst_addr	(id_dst_addr),	  // æ±ç”¨ãƒ¬ã‚¸ã‚¹ã‚¿æ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹
+		.id_gpr_we_		(id_gpr_we_),	  // æ±ç”¨ãƒ¬ã‚¸ã‚¹ã‚¿æ›¸ãè¾¼ã¿æœ‰åŠ¹
+		.id_exp_code	(id_exp_code)	  // ä¾‹å¤–ã‚³ãƒ¼ãƒ‰
 	);
 
 endmodule

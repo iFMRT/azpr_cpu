@@ -1,10 +1,10 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: global_config.h
- -- DESCRIPTION : È«¾ÖÉèÖÃ
+ -- DESCRIPTION : å…¨å±€è®¾ç½®
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- 1.0.1	  2014/07/27  zhangly 
  -- ============================================================================
 */
@@ -13,52 +13,52 @@
 	`define __GLOBAL_CONFIG_HEADER__	//  
 
 //------------------------------------------------------------------------------
-// ÔO¶¨í—Ä¿
+// è¨­å®šé …ç›®
 //------------------------------------------------------------------------------
-	/********** Ä¿±ê¿ª·¢°åÉèÖÃ **********/
-//	`define TARGET_DEV_MFPGA_SPAR3E		// MFPGA°å
-	`define TARGET_DEV_AZPR_EV_BOARD	// AZPRÔ­Éú°å
+	/********** ç›®æ ‡å¼€å‘æ¿è®¾ç½® **********/
+//	`define TARGET_DEV_MFPGA_SPAR3E		// MFPGAæ¿
+	`define TARGET_DEV_AZPR_EV_BOARD	// AZPRåŸç”Ÿæ¿
 
-/********** ¸´Î»ĞÅºÅ¼«ĞÔÑ¡Ôñ**********/
+/********** å¤ä½ä¿¡å·ææ€§é€‰æ‹©**********/
 //	`define POSITIVE_RESET				// Active High
 	`define NEGATIVE_RESET				// Active Low
 
-	/********** ÄÚ´æ¿ØÖÆĞÅºÅ¼«ĞÔÑ¡Ôñ **********/
+	/********** å†…å­˜æ§åˆ¶ä¿¡å·ææ€§é€‰æ‹© **********/
 	`define POSITIVE_MEMORY				// Active High
 //	`define NEGATIVE_MEMORY				// Active Low
 
-	/********** I/O Éè±¸Ñ¡Ôñ**********/
-	`define IMPLEMENT_TIMER				// ¶¨Ê±Æ÷
+	/********** I/O è®¾å¤‡é€‰æ‹©**********/
+	`define IMPLEMENT_TIMER				// å®šæ—¶å™¨
 	`define IMPLEMENT_UART				// UART
 	`define IMPLEMENT_GPIO				// General Purpose I/O
 
 //------------------------------------------------------------------------------
-// Éú³ÉµÄ²ÎÊıÈ¡¾öÓÚÅäÖÃ
+// ç”Ÿæˆçš„å‚æ•°å–å†³äºé…ç½®
 //------------------------------------------------------------------------------
-/********** ¸´Î»¼«ĞÔ *********/
+/********** å¤ä½ææ€§ *********/
 	// Active Low
 	`ifdef POSITIVE_RESET
-		`define RESET_EDGE	  posedge	// ÉÏÉıÑØ
-		`define RESET_ENABLE  1'b1		// ¸´Î»ÓĞĞ§
-		`define RESET_DISABLE 1'b0		// ¸´Î»ÎŞĞ§
+		`define RESET_EDGE	  posedge	// ä¸Šå‡æ²¿
+		`define RESET_ENABLE  1'b1		// å¤ä½æœ‰æ•ˆ
+		`define RESET_DISABLE 1'b0		// å¤ä½æ— æ•ˆ
 	`endif
 	// Active High
 	`ifdef NEGATIVE_RESET
-		`define RESET_EDGE	  negedge	// ÏÂ½µÑØ
-		`define RESET_ENABLE  1'b0		// ¸´Î»ÓĞĞ§
-		`define RESET_DISABLE 1'b1		// ¸´Î»ÎŞĞ§
+		`define RESET_EDGE	  negedge	// ä¸‹é™æ²¿
+		`define RESET_ENABLE  1'b0		// å¤ä½æœ‰æ•ˆ
+		`define RESET_DISABLE 1'b1		// å¤ä½æ— æ•ˆ
 	`endif
 
-	/********** ÄÚ´æ¿ØÖÆĞÅºÅ¼«ĞÔ *********/
+	/********** å†…å­˜æ§åˆ¶ä¿¡å·ææ€§ *********/
 	// Actoive High
 	`ifdef POSITIVE_MEMORY
-		`define MEM_ENABLE	  1'b1		// ÄÚ´æÓĞĞ§
-		`define MEM_DISABLE	  1'b0		// ÄÚ´æÎŞĞ§
+		`define MEM_ENABLE	  1'b1		// å†…å­˜æœ‰æ•ˆ
+		`define MEM_DISABLE	  1'b0		// å†…å­˜æ— æ•ˆ
 	`endif
 	// Active Low
 	`ifdef NEGATIVE_MEMORY
-		`define MEM_ENABLE	  1'b0		// ÄÚ´æÓĞĞ§
-		`define MEM_DISABLE	  1'b1		// ÄÚ´æÎŞĞ§
+		`define MEM_ENABLE	  1'b0		// å†…å­˜æœ‰æ•ˆ
+		`define MEM_DISABLE	  1'b1		// å†…å­˜æ— æ•ˆ
 	`endif
 
 `endif

@@ -1,10 +1,10 @@
-/*
+๏ปฟ/*
  -- ============================================================================
  -- FILE NAME	: bus.h
- -- DESCRIPTION : ืÜฯ฿บ๊ถจาๅ
+ -- DESCRIPTION : ๆ€ป็บฟๅฎๅฎไน
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ะยาื๗ณษ
+ -- 1.0.0	  2011/06/27  suito		 ๆ–ฐ่ฆไฝๆ
   -- 1.0.0	  2014/08/2  zhangly	  
  -- ============================================================================
 */
@@ -12,30 +12,30 @@
 `ifndef __BUS_HEADER__
 	`define __BUS_HEADER__			 
 
-	/********** ืÜฯ฿ึ๗ฟุ *********/
-	`define BUS_MASTER_CH	   4	 // ึ๗ฟุสýมฟ
-	`define BUS_MASTER_INDEX_W 2	 // ึ๗ฟุห๗าýฮปฟํ
+	/********** ๆ€ป็บฟไธปๆง *********/
+	`define BUS_MASTER_CH	   4	 // ไธปๆงๆ•ฐ้
+	`define BUS_MASTER_INDEX_W 2	 // ไธปๆง็ดขๅผ•ไฝๅฎฝ
 
-	/********** ืÜฯ฿ห๙ำะี฿*********/
-	`define BusOwnerBus		   1:0	 //ืÜฯ฿ห๙ำะี฿ฮปฟํบ๊
-	`define BUS_OWNER_MASTER_0 2'h0	 // ืÜฯ฿ห๙ำะี฿ ฃบ 0บลืÜฯ฿ึ๗ฟุ
-	`define BUS_OWNER_MASTER_1 2'h1	 // ืÜฯ฿ห๙ำะี฿ ฃบ 1บลืÜฯ฿ึ๗ฟุ
-	`define BUS_OWNER_MASTER_2 2'h2	 // ืÜฯ฿ห๙ำะี฿ ฃบ 2บลืÜฯ฿ึ๗ฟุ
-	`define BUS_OWNER_MASTER_3 2'h3	 // ืÜฯ฿ห๙ำะี฿ ฃบ 3บลืÜฯ฿ึ๗ฟุ
+	/********** ๆ€ป็บฟๆ€ๆ่€…*********/
+	`define BusOwnerBus		   1:0	 //ๆ€ป็บฟๆ€ๆ่€…ไฝๅฎฝๅฎ
+	`define BUS_OWNER_MASTER_0 2'h0	 // ๆ€ป็บฟๆ€ๆ่€… ๏ผ 0ๅทๆ€ป็บฟไธปๆง
+	`define BUS_OWNER_MASTER_1 2'h1	 // ๆ€ป็บฟๆ€ๆ่€… ๏ผ 1ๅทๆ€ป็บฟไธปๆง
+	`define BUS_OWNER_MASTER_2 2'h2	 // ๆ€ป็บฟๆ€ๆ่€… ๏ผ 2ๅทๆ€ป็บฟไธปๆง
+	`define BUS_OWNER_MASTER_3 2'h3	 // ๆ€ป็บฟๆ€ๆ่€… ๏ผ 3ๅทๆ€ป็บฟไธปๆง
 
-	/********** ืÜฯ฿ดำส๔ *********/
-	`define BUS_SLAVE_CH	   8	 // ืÜฯ฿ดำส๔ษ่ฑธสýมฟ
-	`define BUS_SLAVE_INDEX_W  3	 // ดำส๔ห๗าýฮปฟํ
-	`define BusSlaveIndexBus   2:0	 // ืÜฯ฿ดำส๔ห๗าýฮปฟํถจาๅ
-	`define BusSlaveIndexLoc   29:27 // ืÜฯ฿ดำส๔ห๗าýฮปึร
+	/********** ๆ€ป็บฟไปๅฑ *********/
+	`define BUS_SLAVE_CH	   8	 // ๆ€ป็บฟไปๅฑ่ฎพๅคๆ•ฐ้
+	`define BUS_SLAVE_INDEX_W  3	 // ไปๅฑ็ดขๅผ•ไฝๅฎฝ
+	`define BusSlaveIndexBus   2:0	 // ๆ€ป็บฟไปๅฑ็ดขๅผ•ไฝๅฎฝๅฎไน
+	`define BusSlaveIndexLoc   29:27 // ๆ€ป็บฟไปๅฑ็ดขๅผ•ไฝ็ฝฎ
 
-	`define BUS_SLAVE_0		   0	 // 0บลืÜฯ฿ดำส๔
-	`define BUS_SLAVE_1		   1	 // 1บลืÜฯ฿ดำส๔
-	`define BUS_SLAVE_2		   2	 // 2บลืÜฯ฿ดำส๔
-	`define BUS_SLAVE_3		   3	 // 3บลืÜฯ฿ดำส๔
-	`define BUS_SLAVE_4		   4	 // 4บลืÜฯ฿ดำส๔
-	`define BUS_SLAVE_5		   5	 // 5บลืÜฯ฿ดำส๔
-	`define BUS_SLAVE_6		   6	 // 6บลืÜฯ฿ดำส๔
-	`define BUS_SLAVE_7		   7	 // 7บลืÜฯ฿ดำส๔
+	`define BUS_SLAVE_0		   0	 // 0ๅทๆ€ป็บฟไปๅฑ
+	`define BUS_SLAVE_1		   1	 // 1ๅทๆ€ป็บฟไปๅฑ
+	`define BUS_SLAVE_2		   2	 // 2ๅทๆ€ป็บฟไปๅฑ
+	`define BUS_SLAVE_3		   3	 // 3ๅทๆ€ป็บฟไปๅฑ
+	`define BUS_SLAVE_4		   4	 // 4ๅทๆ€ป็บฟไปๅฑ
+	`define BUS_SLAVE_5		   5	 // 5ๅทๆ€ป็บฟไปๅฑ
+	`define BUS_SLAVE_6		   6	 // 6ๅทๆ€ป็บฟไปๅฑ
+	`define BUS_SLAVE_7		   7	 // 7ๅทๆ€ป็บฟไปๅฑ
 
 `endif

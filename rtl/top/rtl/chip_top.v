@@ -1,84 +1,84 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: chip_top.v
- -- DESCRIPTION : ¶¥²ãÄ£¿é
+ -- DESCRIPTION : é¡¶å±‚æ¨¡å—
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ´´½¨
+ -- 1.0.0	  2011/06/27  suito		 åˆ›å»º
  -- 1.0.1	  2014/06/27  zhangly    
  -- ============================================================================
 */
   
-/********** Í¨ÓÃÍ·ÎÄ¼ş **********/
+/********** é€šç”¨å¤´æ–‡ä»¶ **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** ÏîÄ¿Í·ÎÄ¼ş **********/
+/********** é¡¹ç›®å¤´æ–‡ä»¶ **********/
 `include "gpio.h"
 
-/********** Ä£¿é **********/
+/********** æ¨¡å— **********/
 module chip_top (
-	/********** Ê±ÖÓÓë¸´Î» **********/
-	input wire				   clk_ref,		  // »ù±¾Ê±ÖÓ
-	input wire				   reset_sw		  // È«¾Ö¸´Î»£¬È±Ê¡¶¨ÒåÎª¸ºÂß¼­,¼ûglobal_config.h
+	/********** æ—¶é’Ÿä¸å¤ä½ **********/
+	input wire				   clk_ref,		  // åŸºæœ¬æ—¶é’Ÿ
+	input wire				   reset_sw		  // å…¨å±€å¤ä½ï¼Œç¼ºçœå®šä¹‰ä¸ºè´Ÿé€»è¾‘,è§global_config.h
 	/********** UART **********/
-`ifdef IMPLEMENT_UART // UARTÊµÏÖ
-	, input wire			   uart_rx		  // UART½ÓÊÕĞÅºÅ
-	, output wire			   uart_tx		  // UART·¢ËÍĞÅºÅ
+`ifdef IMPLEMENT_UART // UARTå®ç°
+	, input wire			   uart_rx		  // UARTæ¥æ”¶ä¿¡å·
+	, output wire			   uart_tx		  // UARTå‘é€ä¿¡å·
 `endif
-	/********** Í¨ÓÃI/ O¶Ë¿Ú **********/
-`ifdef IMPLEMENT_GPIO // GPIOÊµÏÖ
-`ifdef GPIO_IN_CH	 //ÊäÈë½Ó¿ÚÊµÏÖ
-	, input wire [`GPIO_IN_CH-1:0]	 gpio_in  // ÊäÈë½Ó¿Ú
+	/********** é€šç”¨I/ Oç«¯å£ **********/
+`ifdef IMPLEMENT_GPIO // GPIOå®ç°
+`ifdef GPIO_IN_CH	 //è¾“å…¥æ¥å£å®ç°
+	, input wire [`GPIO_IN_CH-1:0]	 gpio_in  // è¾“å…¥æ¥å£
 `endif
-`ifdef GPIO_OUT_CH	 // Êä³ö½Ó¿ÚÊµÏÖ
-	, output wire [`GPIO_OUT_CH-1:0] gpio_out // Êä³ö½Ó¿Ú
+`ifdef GPIO_OUT_CH	 // è¾“å‡ºæ¥å£å®ç°
+	, output wire [`GPIO_OUT_CH-1:0] gpio_out // è¾“å‡ºæ¥å£
 `endif
-`ifdef GPIO_IO_CH	 // ÊäÈëÊä³ö½Ó¿ÚÊµÏÖ
-	, inout wire [`GPIO_IO_CH-1:0]	 gpio_io  // ÊäÈëÊä³ö½Ó¿Ú
+`ifdef GPIO_IO_CH	 // è¾“å…¥è¾“å‡ºæ¥å£å®ç°
+	, inout wire [`GPIO_IO_CH-1:0]	 gpio_io  // è¾“å…¥è¾“å‡ºæ¥å£
 `endif
 `endif
 );
 
-	/********** Ê±ÖÓÓë¸´Î» **********/
-	wire					   clk;			  	// Ê±ÖÓ
-	wire					   clk_;		  		// ·´ÏàÊ±ÖÓ
-	wire					   chip_reset;	  	// ¸´Î»
+	/********** æ—¶é’Ÿä¸å¤ä½ **********/
+	wire					   clk;			  	// æ—¶é’Ÿ
+	wire					   clk_;		  		// åç›¸æ—¶é’Ÿ
+	wire					   chip_reset;	  	// å¤ä½
    
-	/********** Ê±ÖÓÄ£¿é **********/
+	/********** æ—¶é’Ÿæ¨¡å— **********/
 	clk_gen clk_gen (
-		/**********  Ê±ÖÓÓë¸´Î» **********/
-		.clk_ref	  (clk_ref),			  	// »ù±¾Ê±ÖÓ
-		.reset_sw	  (reset_sw),			// È«¾Ö¸´Î»
-		/********** Éú³ÉÊ±ÖÓ **********/
-		.clk		  (clk),				  		// Ê±ÖÓ
-		.clk_		  (clk_),				  	// ·´ÏòÊ±ÖÓ
-		/********** ¸´Î» **********/
-		.chip_reset	  (chip_reset)			// ¸´Î»
+		/**********  æ—¶é’Ÿä¸å¤ä½ **********/
+		.clk_ref	  (clk_ref),			  	// åŸºæœ¬æ—¶é’Ÿ
+		.reset_sw	  (reset_sw),			// å…¨å±€å¤ä½
+		/********** ç”Ÿæˆæ—¶é’Ÿ **********/
+		.clk		  (clk),				  		// æ—¶é’Ÿ
+		.clk_		  (clk_),				  	// åå‘æ—¶é’Ÿ
+		/********** å¤ä½ **********/
+		.chip_reset	  (chip_reset)			// å¤ä½
 	);
 
-	/********** Ğ¾Æ¬ **********/
+	/********** èŠ¯ç‰‡ **********/
 	chip chip (
-		/********** Ê±ÖÓÓë¸´Î» **********/
-		.clk	  (clk),					  // Ê±ÖÓ
-		.clk_	  (clk_),					  // ·´ÏòÊ±ÖÓ
-		.reset	  (chip_reset)				  // ¸´Î»
+		/********** æ—¶é’Ÿä¸å¤ä½ **********/
+		.clk	  (clk),					  // æ—¶é’Ÿ
+		.clk_	  (clk_),					  // åå‘æ—¶é’Ÿ
+		.reset	  (chip_reset)				  // å¤ä½
 		/********** UART **********/
 `ifdef IMPLEMENT_UART
-		, .uart_rx	(uart_rx)				  // UART½ÓÊÕĞÅºÅ
-		, .uart_tx	(uart_tx)				  // UART·¢ËÍĞÅºÅ
+		, .uart_rx	(uart_rx)				  // UARTæ¥æ”¶ä¿¡å·
+		, .uart_tx	(uart_tx)				  // UARTå‘é€ä¿¡å·
 `endif
 		/********** GPIO **********/
 `ifdef IMPLEMENT_GPIO
-`ifdef GPIO_IN_CH  // ÊäÈë½Ó¿ÚÊµÏÖ
-		, .gpio_in (gpio_in)				  // ÊäÈë½Ó¿Ú
+`ifdef GPIO_IN_CH  // è¾“å…¥æ¥å£å®ç°
+		, .gpio_in (gpio_in)				  // è¾“å…¥æ¥å£
 `endif
-`ifdef GPIO_OUT_CH // Êä³ö½Ó¿ÚÊµÏÖ
-		, .gpio_out (gpio_out)				  // Êä³ö½Ó¿Ú
+`ifdef GPIO_OUT_CH // è¾“å‡ºæ¥å£å®ç°
+		, .gpio_out (gpio_out)				  // è¾“å‡ºæ¥å£
 `endif
-`ifdef GPIO_IO_CH  // ÊäÈëÊä³ö½Ó¿ÚÊµÏÖ
-		, .gpio_io	(gpio_io)				  // ÊäÈëÊä³ö½Ó¿Ú
+`ifdef GPIO_IO_CH  // è¾“å…¥è¾“å‡ºæ¥å£å®ç°
+		, .gpio_io	(gpio_io)				  // è¾“å…¥è¾“å‡ºæ¥å£
 `endif
 `endif
 	);

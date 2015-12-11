@@ -1,4 +1,4 @@
-#! /c/iverilog/bin/vvp
+﻿#! /c/iverilog/bin/vvp
 :ivl_version "0.9.5 " "(v0_9_5)";
 :vpi_time_precision - 12;
 :vpi_module "system";

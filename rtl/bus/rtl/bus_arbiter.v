@@ -1,121 +1,121 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE	 : bus_arbiter.v
- -- SYNOPSIS : ×ÜÏßÖÙ²ÃÆ÷Ä£¿é£¬Ê¹ÓÃÂÖÑ¯»úÖÆ°´ÇëÇóË³Ğò½øĞĞÊ¹ÓÃÈ¨·ÖÅä£¬ÇÒÆ½µÈ¶Ô´ıËùÓĞ×ÜÏßÖ÷¿Ø
+ -- SYNOPSIS : æ€»çº¿ä»²è£å™¨æ¨¡å—ï¼Œä½¿ç”¨è½®è¯¢æœºåˆ¶æŒ‰è¯·æ±‚é¡ºåºè¿›è¡Œä½¿ç”¨æƒåˆ†é…ï¼Œä¸”å¹³ç­‰å¯¹å¾…æ‰€æœ‰æ€»çº¿ä¸»æ§
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** Í¨ÓÃÍ·ÎÄ¼ş **********/
+/********** é€šç”¨å¤´æ–‡ä»¶ **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** Ä£¿éÍ·ÎÄ¼ş **********/
+/********** æ¨¡å—å¤´æ–‡ä»¶ **********/
 `include "bus.h"
 
-/********** ×ÜÏßÖÙ²ÃÆ÷ **********/
+/********** æ€»çº¿ä»²è£å™¨ **********/
 module bus_arbiter (
-	/********** Ê±ÖÓÓë¸´Î» **********/
-	input  wire		   clk,		 // Ê±ÖÓ
-	input  wire		   reset,	 // Òì²½¸´Î»
-	/********** ÊäÈëÊä³öĞÅºÅ **********/
-	//  0ºÅ×ÜÏßÖ÷¿Ø
-	input  wire		   m0_req_,	 // ÇëÇó×ÜÏß
-	output reg		   m0_grnt_, // ¸³Óè×ÜÏß
-	//  1ºÅ×ÜÏßÖ÷¿Ø
-	input  wire		   m1_req_,	 // ÇëÇó×ÜÏß
-	output reg		   m1_grnt_, // ¸³Óè×ÜÏß
-	//  2ºÅ×ÜÏßÖ÷¿Ø
-	input  wire		   m2_req_,	 // ÇëÇó×ÜÏß
-	output reg		   m2_grnt_, // ¸³Óè×ÜÏß
-	//  3ºÅ×ÜÏßÖ÷¿Ø
-	input  wire		   m3_req_,	 // ÇëÇó×ÜÏß
-	output reg		   m3_grnt_	 // ¸³Óè×ÜÏß
+	/********** æ—¶é’Ÿä¸å¤ä½ **********/
+	input  wire		   clk,		 // æ—¶é’Ÿ
+	input  wire		   reset,	 // å¼‚æ­¥å¤ä½
+	/********** è¾“å…¥è¾“å‡ºä¿¡å· **********/
+	//  0å·æ€»çº¿ä¸»æ§
+	input  wire		   m0_req_,	 // è¯·æ±‚æ€»çº¿
+	output reg		   m0_grnt_, // èµ‹äºˆæ€»çº¿
+	//  1å·æ€»çº¿ä¸»æ§
+	input  wire		   m1_req_,	 // è¯·æ±‚æ€»çº¿
+	output reg		   m1_grnt_, // èµ‹äºˆæ€»çº¿
+	//  2å·æ€»çº¿ä¸»æ§
+	input  wire		   m2_req_,	 // è¯·æ±‚æ€»çº¿
+	output reg		   m2_grnt_, // èµ‹äºˆæ€»çº¿
+	//  3å·æ€»çº¿ä¸»æ§
+	input  wire		   m3_req_,	 // è¯·æ±‚æ€»çº¿
+	output reg		   m3_grnt_	 // èµ‹äºˆæ€»çº¿
 );
 
-	/********** ÄÚ²¿ĞÅºÅ **********/
-	reg [`BusOwnerBus] owner;	 // ×ÜÏßµ±Ç°ËùÓĞÕß
+	/********** å†…éƒ¨ä¿¡å· **********/
+	reg [`BusOwnerBus] owner;	 // æ€»çº¿å½“å‰æ‰€æœ‰è€…
    
-	/********** ¸³Óè×ÜÏßÊ¹ÓÃÈ¨**********/
+	/********** èµ‹äºˆæ€»çº¿ä½¿ç”¨æƒ**********/
 	always @(*) begin
-		/* ¸³Óè×ÜÏßÊ¹ÓÃÈ¨³õÊ¼»¯ */
+		/* èµ‹äºˆæ€»çº¿ä½¿ç”¨æƒåˆå§‹åŒ– */
 		m0_grnt_ = `DISABLE_;
 		m1_grnt_ = `DISABLE_;
 		m2_grnt_ = `DISABLE_;
 		m3_grnt_ = `DISABLE_;
-		/* ¸³Óè×ÜÏßÊ¹ÓÃÈ¨ */
+		/* èµ‹äºˆæ€»çº¿ä½¿ç”¨æƒ */
 		case (owner)
-			`BUS_OWNER_MASTER_0 : begin // 0ºÅ×ÜÏßÖ÷¿Ø
+			`BUS_OWNER_MASTER_0 : begin // 0å·æ€»çº¿ä¸»æ§
 				m0_grnt_ = `ENABLE_;
 			end
-			`BUS_OWNER_MASTER_1 : begin // 1ºÅ×ÜÏßÖ÷¿Ø
+			`BUS_OWNER_MASTER_1 : begin // 1å·æ€»çº¿ä¸»æ§
 				m1_grnt_ = `ENABLE_;
 			end
-			`BUS_OWNER_MASTER_2 : begin // 2ºÅ×ÜÏßÖ÷¿Ø
+			`BUS_OWNER_MASTER_2 : begin // 2å·æ€»çº¿ä¸»æ§
 				m2_grnt_ = `ENABLE_;
 			end
-			`BUS_OWNER_MASTER_3 : begin // 3ºÅ×ÜÏßÖ÷¿Ø
+			`BUS_OWNER_MASTER_3 : begin // 3å·æ€»çº¿ä¸»æ§
 				m3_grnt_ = `ENABLE_;
 			end
 		endcase
 	end
    
-	/********** ×ÜÏßÊ¹ÓÃÈ¨ÖÙ²Ã **********/
+	/********** æ€»çº¿ä½¿ç”¨æƒä»²è£ **********/
 	always @(posedge clk or `RESET_EDGE reset) begin
 		if (reset == `RESET_ENABLE) begin
-			/* Òì²½¸´Î» */
+			/* å¼‚æ­¥å¤ä½ */
 			owner <= #1 `BUS_OWNER_MASTER_0;
 		end else begin
-			/* ÖÙ²Ã */
+			/* ä»²è£ */
 			case (owner)
-				`BUS_OWNER_MASTER_0 : begin // ×ÜÏßÊ¹ÓÃÈ¨ËùÓĞÕß£º0ºÅ×ÜÏßÖ÷¿Ø
-					/* ÏÂÒ»¸ö»ñµÃ×ÜÏßÊ¹ÓÃÈ¨µÄÖ÷¿Ø */
-					if (m0_req_ == `ENABLE_) begin			// 0ºÅ×ÜÏßÖ÷¿Ø
+				`BUS_OWNER_MASTER_0 : begin // æ€»çº¿ä½¿ç”¨æƒæ‰€æœ‰è€…ï¼š0å·æ€»çº¿ä¸»æ§
+					/* ä¸‹ä¸€ä¸ªè·å¾—æ€»çº¿ä½¿ç”¨æƒçš„ä¸»æ§ */
+					if (m0_req_ == `ENABLE_) begin			// 0å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_0;
-					end else if (m1_req_ == `ENABLE_) begin // 1ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m1_req_ == `ENABLE_) begin // 1å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_1;
-					end else if (m2_req_ == `ENABLE_) begin // 2ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m2_req_ == `ENABLE_) begin // 2å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_2;
-					end else if (m3_req_ == `ENABLE_) begin // 3ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m3_req_ == `ENABLE_) begin // 3å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_3;
 					end
 				end
-				`BUS_OWNER_MASTER_1 : begin // ×ÜÏßÊ¹ÓÃÈ¨ËùÓĞÕß£º1ºÅ×ÜÏßÖ÷¿Ø
-					/* ÏÂÒ»¸ö»ñµÃ×ÜÏßÊ¹ÓÃÈ¨µÄÖ÷¿Ø */
-					if (m1_req_ == `ENABLE_) begin			// 1ºÅ×ÜÏßÖ÷¿Ø
+				`BUS_OWNER_MASTER_1 : begin // æ€»çº¿ä½¿ç”¨æƒæ‰€æœ‰è€…ï¼š1å·æ€»çº¿ä¸»æ§
+					/* ä¸‹ä¸€ä¸ªè·å¾—æ€»çº¿ä½¿ç”¨æƒçš„ä¸»æ§ */
+					if (m1_req_ == `ENABLE_) begin			// 1å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_1;
-					end else if (m2_req_ == `ENABLE_) begin // 2ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m2_req_ == `ENABLE_) begin // 2å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_2;
-					end else if (m3_req_ == `ENABLE_) begin // 3ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m3_req_ == `ENABLE_) begin // 3å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_3;
-					end else if (m0_req_ == `ENABLE_) begin // 0ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m0_req_ == `ENABLE_) begin // 0å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_0;
 					end
 				end
-				`BUS_OWNER_MASTER_2 : begin // ×ÜÏßÊ¹ÓÃÈ¨ËùÓĞÕß£º2ºÅ×ÜÏßÖ÷¿Ø
-					/* ÏÂÒ»¸ö»ñµÃ×ÜÏßÊ¹ÓÃÈ¨µÄÖ÷¿Ø */
-					if (m2_req_ == `ENABLE_) begin			// 2ºÅ×ÜÏßÖ÷¿Ø
+				`BUS_OWNER_MASTER_2 : begin // æ€»çº¿ä½¿ç”¨æƒæ‰€æœ‰è€…ï¼š2å·æ€»çº¿ä¸»æ§
+					/* ä¸‹ä¸€ä¸ªè·å¾—æ€»çº¿ä½¿ç”¨æƒçš„ä¸»æ§ */
+					if (m2_req_ == `ENABLE_) begin			// 2å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_2;
-					end else if (m3_req_ == `ENABLE_) begin // 3ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m3_req_ == `ENABLE_) begin // 3å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_3;
-					end else if (m0_req_ == `ENABLE_) begin // 0ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m0_req_ == `ENABLE_) begin // 0å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_0;
-					end else if (m1_req_ == `ENABLE_) begin // 1ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m1_req_ == `ENABLE_) begin // 1å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_1;
 					end
 				end
-				`BUS_OWNER_MASTER_3 : begin // ×ÜÏßÊ¹ÓÃÈ¨ËùÓĞÕß£º3ºÅ×ÜÏßÖ÷¿Ø
-					/* ÏÂÒ»¸ö»ñµÃ×ÜÏßÊ¹ÓÃÈ¨µÄÖ÷¿Ø */
-					if (m3_req_ == `ENABLE_) begin			// 3ºÅ×ÜÏßÖ÷¿Ø
+				`BUS_OWNER_MASTER_3 : begin // æ€»çº¿ä½¿ç”¨æƒæ‰€æœ‰è€…ï¼š3å·æ€»çº¿ä¸»æ§
+					/* ä¸‹ä¸€ä¸ªè·å¾—æ€»çº¿ä½¿ç”¨æƒçš„ä¸»æ§ */
+					if (m3_req_ == `ENABLE_) begin			// 3å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_3;
-					end else if (m0_req_ == `ENABLE_) begin // 0ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m0_req_ == `ENABLE_) begin // 0å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_0;
-					end else if (m1_req_ == `ENABLE_) begin // 1ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m1_req_ == `ENABLE_) begin // 1å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_1;
-					end else if (m2_req_ == `ENABLE_) begin // 2ºÅ×ÜÏßÖ÷¿Ø
+					end else if (m2_req_ == `ENABLE_) begin // 2å·æ€»çº¿ä¸»æ§
 						owner <= #1 `BUS_OWNER_MASTER_2;
 					end
 				end

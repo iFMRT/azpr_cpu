@@ -1,75 +1,75 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: alu.v
- -- DESCRIPTION : ËãĞgÕ“ÀíÑİËã¥æ¥Ë¥Ã¥È
+ -- DESCRIPTION : ç®—è¡“è«–ç†æ¼”ç®—ãƒ¦ãƒ‹ãƒƒãƒˆ
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** ¹²Í¨¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å…±é€šãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "nettype.h"
 `include "global_config.h"
 `include "stddef.h"
 
-/********** ‚€„e¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å€‹åˆ¥ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "cpu.h"
 
-/********** ¥â¥¸¥å©`¥ë **********/
+/********** ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ« **********/
 module alu (
-	input  wire [`WordDataBus] in_0,  // ÈëÁ¦ 0
-	input  wire [`WordDataBus] in_1,  // ÈëÁ¦ 1
-	input  wire [`AluOpBus]	   op,	  // ¥ª¥Ú¥ì©`¥·¥ç¥ó
-	output reg	[`WordDataBus] out,	  // ³öÁ¦
-	output reg				   of	  // ¥ª©`¥Ğ¥Õ¥í©`
+	input  wire [`WordDataBus] in_0,  // å…¥åŠ› 0
+	input  wire [`WordDataBus] in_1,  // å…¥åŠ› 1
+	input  wire [`AluOpBus]	   op,	  // ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	output reg	[`WordDataBus] out,	  // å‡ºåŠ›
+	output reg				   of	  // ã‚ªãƒ¼ãƒãƒ•ãƒ­ãƒ¼
 );
 
-	/********** ·ûºÅ¸¶¤­Èë³öÁ¦ĞÅºÅ **********/
-	wire signed [`WordDataBus] s_in_0 = $signed(in_0); // ·ûºÅ¸¶¤­ÈëÁ¦ 0
-	wire signed [`WordDataBus] s_in_1 = $signed(in_1); // ·ûºÅ¸¶¤­ÈëÁ¦ 1
-	wire signed [`WordDataBus] s_out  = $signed(out);  // ·ûºÅ¸¶¤­³öÁ¦
+	/********** ç¬¦å·ä»˜ãå…¥å‡ºåŠ›ä¿¡å· **********/
+	wire signed [`WordDataBus] s_in_0 = $signed(in_0); // ç¬¦å·ä»˜ãå…¥åŠ› 0
+	wire signed [`WordDataBus] s_in_1 = $signed(in_1); // ç¬¦å·ä»˜ãå…¥åŠ› 1
+	wire signed [`WordDataBus] s_out  = $signed(out);  // ç¬¦å·ä»˜ãå‡ºåŠ›
 
-	/********** ËãĞgÕ“ÀíÑİËã **********/
+	/********** ç®—è¡“è«–ç†æ¼”ç®— **********/
 	always @(*) begin
 		case (op)
-			`ALU_OP_AND	 : begin // Õ“Àí·e£¨AND£©
+			`ALU_OP_AND	 : begin // è«–ç†ç©ï¼ˆANDï¼‰
 				out	  = in_0 & in_1;
 			end
-			`ALU_OP_OR	 : begin // Õ“ÀíºÍ£¨OR£©
+			`ALU_OP_OR	 : begin // è«–ç†å’Œï¼ˆORï¼‰
 				out	  = in_0 | in_1;
 			end
-			`ALU_OP_XOR	 : begin // ÅÅËûµÄÕ“ÀíºÍ£¨XOR£©
+			`ALU_OP_XOR	 : begin // æ’ä»–çš„è«–ç†å’Œï¼ˆXORï¼‰
 				out	  = in_0 ^ in_1;
 			end
-			`ALU_OP_ADDS : begin // ·ûºÅ¸¶¤­¼ÓËã
+			`ALU_OP_ADDS : begin // ç¬¦å·ä»˜ãåŠ ç®—
 				out	  = in_0 + in_1;
 			end
-			`ALU_OP_ADDU : begin // ·ûºÅ¤Ê¤·¼ÓËã
+			`ALU_OP_ADDU : begin // ç¬¦å·ãªã—åŠ ç®—
 				out	  = in_0 + in_1;
 			end
-			`ALU_OP_SUBS : begin // ·ûºÅ¸¶¤­œpËã
+			`ALU_OP_SUBS : begin // ç¬¦å·ä»˜ãæ¸›ç®—
 				out	  = in_0 - in_1;
 			end
-			`ALU_OP_SUBU : begin // ·ûºÅ¤Ê¤·œpËã
+			`ALU_OP_SUBU : begin // ç¬¦å·ãªã—æ¸›ç®—
 				out	  = in_0 - in_1;
 			end
-			`ALU_OP_SHRL : begin // Õ“ÀíÓÒ¥·¥Õ¥È
+			`ALU_OP_SHRL : begin // è«–ç†å³ã‚·ãƒ•ãƒˆ
 				out	  = in_0 >> in_1[`ShAmountLoc];
 			end
-			`ALU_OP_SHLL : begin // Õ“Àí×ó¥·¥Õ¥È
+			`ALU_OP_SHLL : begin // è«–ç†å·¦ã‚·ãƒ•ãƒˆ
 				out	  = in_0 << in_1[`ShAmountLoc];
 			end
-			default		 : begin // ¥Ç¥Õ¥©¥ë¥È‚ (No Operation)
+			default		 : begin // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ (No Operation)
 				out	  = in_0;
 			end
 		endcase
 	end
 
-	/********** ¥ª©`¥Ğ¥Õ¥í©`¥Á¥§¥Ã¥¯ **********/
+	/********** ã‚ªãƒ¼ãƒãƒ•ãƒ­ãƒ¼ãƒã‚§ãƒƒã‚¯ **********/
 	always @(*) begin
 		case (op)
-			`ALU_OP_ADDS : begin // ¼ÓËã¥ª©`¥Ğ¥Õ¥í©`¤Î¥Á¥§¥Ã¥¯
+			`ALU_OP_ADDS : begin // åŠ ç®—ã‚ªãƒ¼ãƒãƒ•ãƒ­ãƒ¼ã®ãƒã‚§ãƒƒã‚¯
 				if (((s_in_0 > 0) && (s_in_1 > 0) && (s_out < 0)) ||
 					((s_in_0 < 0) && (s_in_1 < 0) && (s_out > 0))) begin
 					of = `ENABLE;
@@ -77,7 +77,7 @@ module alu (
 					of = `DISABLE;
 				end
 			end
-			`ALU_OP_SUBS : begin // œpËã¥ª©`¥Ğ¥Õ¥í©`¤Î¥Á¥§¥Ã¥¯
+			`ALU_OP_SUBS : begin // æ¸›ç®—ã‚ªãƒ¼ãƒãƒ•ãƒ­ãƒ¼ã®ãƒã‚§ãƒƒã‚¯
 				if (((s_in_0 < 0) && (s_in_1 > 0) && (s_out > 0)) ||
 					((s_in_0 > 0) && (s_in_1 < 0) && (s_out < 0))) begin
 					of = `ENABLE;
@@ -85,7 +85,7 @@ module alu (
 					of = `DISABLE;
 				end
 			end
-			default		: begin // ¥Ç¥Õ¥©¥ë¥È‚
+			default		: begin // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤
 				of = `DISABLE;
 			end
 		endcase

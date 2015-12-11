@@ -1,58 +1,58 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: clk_gen.v
- -- DESCRIPTION : Ê±ÖÓÉú³ÉÄ£¿é
+ -- DESCRIPTION : æ—¶é’Ÿç”Ÿæˆæ¨¡å—
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ´´½¨
+ -- 1.0.0	  2011/06/27  suito		 åˆ›å»º
  -- 1.0.1	  2014/06/27  zhangly
  -- ============================================================================
 */
  
-/********** Í¨ÓÃÍ·ÎÄ¼ş **********/
+/********** é€šç”¨å¤´æ–‡ä»¶ **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** Ä£¿é **********/
+/********** æ¨¡å— **********/
 module clk_gen (
-	/********** Ê±ÖÓÓë¸´Î» **********/
-	input wire	clk_ref,   // »ù±¾Ê±ÖÓ
-	input wire	reset_sw,  // È«¾Ö¸´Î»
-	/********** Éú³ÉÊ±ÖÓ **********/
-	output wire clk,	   // Ê±ÖÓ
-	output wire clk_,	   // ·´ÏàÊ±ÖÓ
-	/********** Ğ¾Æ¬¸´Î» **********/
-	output wire chip_reset // Ğ¾Æ¬¸´Î»
+	/********** æ—¶é’Ÿä¸å¤ä½ **********/
+	input wire	clk_ref,   // åŸºæœ¬æ—¶é’Ÿ
+	input wire	reset_sw,  // å…¨å±€å¤ä½
+	/********** ç”Ÿæˆæ—¶é’Ÿ **********/
+	output wire clk,	   // æ—¶é’Ÿ
+	output wire clk_,	   // åç›¸æ—¶é’Ÿ
+	/********** èŠ¯ç‰‡å¤ä½ **********/
+	output wire chip_reset // èŠ¯ç‰‡å¤ä½
 );
 
-	/********** ÄÚ²¿ĞÅºÅ **********/
-	wire		locked;	   // Ëø¶¨ĞÅºÅ
-	wire		dcm_reset; // dcm ¸´Î»
+	/********** å†…éƒ¨ä¿¡å· **********/
+	wire		locked;	   // é”å®šä¿¡å·
+	wire		dcm_reset; // dcm å¤ä½
 
-	/********** ²úÉú¸´Î» **********/
-	// DCM¸´Î»
+	/********** äº§ç”Ÿå¤ä½ **********/
+	// DCMå¤ä½
 	assign dcm_reset  = (reset_sw == `RESET_ENABLE) ? `ENABLE : `DISABLE;
-	// Ğ¾Æ¬¸´Î»
+	// èŠ¯ç‰‡å¤ä½
 	assign chip_reset = ((reset_sw == `RESET_ENABLE) || (locked == `DISABLE)) ?
 							`RESET_ENABLE : `RESET_DISABLE;
 
 	/********** Xilinx DCM (Digitl Clock Manager) -> altera pll**********/
 	/* x_s3e_dcm x_s3e_dcm (
-		.CLKIN_IN		 (clk_ref),	  // »ù±¾Ê±ÖÓ
-		.RST_IN			 (dcm_reset), // DCM¸´Î»
-		.CLK0_OUT		 (clk),		  // Ê±ÖÓ
-		.CLK180_OUT		 (clk_),	  // ·´ÏàÊ±ÖÓ
-		.LOCKED_OUT		 (locked)	  // Ëø¶¨
+		.CLKIN_IN		 (clk_ref),	  // åŸºæœ¬æ—¶é’Ÿ
+		.RST_IN			 (dcm_reset), // DCMå¤ä½
+		.CLK0_OUT		 (clk),		  // æ—¶é’Ÿ
+		.CLK180_OUT		 (clk_),	  // åç›¸æ—¶é’Ÿ
+		.LOCKED_OUT		 (locked)	  // é”å®š
    );
 	*/
 	
 	altera_dcm x_s3e_dcm (
-		.inclk0		 (clk_ref),	  // »ù±¾Ê±ÖÓ
-		.areset			 (dcm_reset), // DCM¸´Î»
-		.c0		 (clk),		  // Ê±ÖÓ
-		.c1		 (clk_),	  // ·´ÏàÊ±ÖÓ
-		.locked		 (locked)	  // Ëø¶¨
+		.inclk0		 (clk_ref),	  // åŸºæœ¬æ—¶é’Ÿ
+		.areset			 (dcm_reset), // DCMå¤ä½
+		.c0		 (clk),		  // æ—¶é’Ÿ
+		.c1		 (clk_),	  // åç›¸æ—¶é’Ÿ
+		.locked		 (locked)	  // é”å®š
    );
 	
 

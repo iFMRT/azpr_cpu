@@ -1,78 +1,78 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: mem_ctrl.v
- -- DESCRIPTION : ¥á¥â¥ê¥¢¥¯¥»¥¹ÖÆÓù¥æ¥Ë¥Ã¥È
+ -- DESCRIPTION : ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹åˆ¶å¾¡ãƒ¦ãƒ‹ãƒƒãƒˆ
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** ¹²Í¨¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å…±é€šãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "nettype.h"
 `include "global_config.h"
 `include "stddef.h"
 
-/********** ‚€„e¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å€‹åˆ¥ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "isa.h"
 `include "cpu.h"
 `include "bus.h"
 
-/********** ¥â¥¸¥å©`¥ë **********/
+/********** ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ« **********/
 module mem_ctrl (
-	/********** EX/MEM¥Ñ¥¤¥×¥é¥¤¥ó¥ì¥¸¥¹¥¿ **********/
-	input  wire				   ex_en,		   // ¥Ñ¥¤¥×¥é¥¤¥ó¥Ç©`¥¿¤ÎÓĞ„¿
-	input  wire [`MemOpBus]	   ex_mem_op,	   // ¥á¥â¥ê¥ª¥Ú¥ì©`¥·¥ç¥ó
-	input  wire [`WordDataBus] ex_mem_wr_data, // ¥á¥â¥ê•ø¤­Şz¤ß¥Ç©`¥¿
-	input  wire [`WordDataBus] ex_out,		   // „IÀí½Y¹û
-	/********** ¥á¥â¥ê¥¢¥¯¥»¥¹¥¤¥ó¥¿¥Õ¥§©`¥¹ **********/
-	input  wire [`WordDataBus] rd_data,		   // Õi¤ß³ö¤·¥Ç©`¥¿
-	output wire [`WordAddrBus] addr,		   // ¥¢¥É¥ì¥¹
-	output reg				   as_,			   // ¥¢¥É¥ì¥¹ÓĞ„¿
-	output reg				   rw,			   // Õi¤ß£¯•ø¤­
-	output wire [`WordDataBus] wr_data,		   // •ø¤­Şz¤ß¥Ç©`¥¿
-	/********** ¥á¥â¥ê¥¢¥¯¥»¥¹½Y¹û **********/
-	output reg [`WordDataBus]  out	 ,		   // ¥á¥â¥ê¥¢¥¯¥»¥¹½Y¹û
-	output reg				   miss_align	   // ¥ß¥¹¥¢¥é¥¤¥ó
+	/********** EX/MEMãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ¬ã‚¸ã‚¹ã‚¿ **********/
+	input  wire				   ex_en,		   // ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãƒ‡ãƒ¼ã‚¿ã®æœ‰åŠ¹
+	input  wire [`MemOpBus]	   ex_mem_op,	   // ãƒ¡ãƒ¢ãƒªã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
+	input  wire [`WordDataBus] ex_mem_wr_data, // ãƒ¡ãƒ¢ãƒªæ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+	input  wire [`WordDataBus] ex_out,		   // å‡¦ç†çµæœ
+	/********** ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ **********/
+	input  wire [`WordDataBus] rd_data,		   // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+	output wire [`WordAddrBus] addr,		   // ã‚¢ãƒ‰ãƒ¬ã‚¹
+	output reg				   as_,			   // ã‚¢ãƒ‰ãƒ¬ã‚¹æœ‰åŠ¹
+	output reg				   rw,			   // èª­ã¿ï¼æ›¸ã
+	output wire [`WordDataBus] wr_data,		   // æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+	/********** ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹çµæœ **********/
+	output reg [`WordDataBus]  out	 ,		   // ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹çµæœ
+	output reg				   miss_align	   // ãƒŸã‚¹ã‚¢ãƒ©ã‚¤ãƒ³
 );
 
-	/********** ÄÚ²¿ĞÅºÅ **********/
-	wire [`ByteOffsetBus]	 offset;		   // ¥ª¥Õ¥»¥Ã¥È
+	/********** å†…éƒ¨ä¿¡å· **********/
+	wire [`ByteOffsetBus]	 offset;		   // ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 
-	/********** ³öÁ¦¤Î¥¢¥µ¥¤¥ó **********/
-	assign wr_data = ex_mem_wr_data;		   // •ø¤­Şz¤ß¥Ç©`¥¿
-	assign addr	   = ex_out[`WordAddrLoc];	   // ¥¢¥É¥ì¥¹
-	assign offset  = ex_out[`ByteOffsetLoc];   // ¥ª¥Õ¥»¥Ã¥È
+	/********** å‡ºåŠ›ã®ã‚¢ã‚µã‚¤ãƒ³ **********/
+	assign wr_data = ex_mem_wr_data;		   // æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+	assign addr	   = ex_out[`WordAddrLoc];	   // ã‚¢ãƒ‰ãƒ¬ã‚¹
+	assign offset  = ex_out[`ByteOffsetLoc];   // ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 
-	/********** ¥á¥â¥ê¥¢¥¯¥»¥¹¤ÎÖÆÓù **********/
+	/********** ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹ã®åˆ¶å¾¡ **********/
 	always @(*) begin
-		/* ¥Ç¥Õ¥©¥ë¥È‚ */
+		/* ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ */
 		miss_align = `DISABLE;
 		out		   = `WORD_DATA_W'h0;
 		as_		   = `DISABLE_;
 		rw		   = `READ;
-		/* ¥á¥â¥ê¥¢¥¯¥»¥¹ */
+		/* ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹ */
 		if (ex_en == `ENABLE) begin
 			case (ex_mem_op)
-				`MEM_OP_LDW : begin // ¥ï©`¥ÉÕi¤ß³ö¤·
-					/* ¥Ğ¥¤¥È¥ª¥Õ¥»¥Ã¥È¤Î¥Á¥§¥Ã¥¯ */
-					if (offset == `BYTE_OFFSET_WORD) begin // ¥¢¥é¥¤¥ó
+				`MEM_OP_LDW : begin // ãƒ¯ãƒ¼ãƒ‰èª­ã¿å‡ºã—
+					/* ãƒã‚¤ãƒˆã‚ªãƒ•ã‚»ãƒƒãƒˆã®ãƒã‚§ãƒƒã‚¯ */
+					if (offset == `BYTE_OFFSET_WORD) begin // ã‚¢ãƒ©ã‚¤ãƒ³
 						out			= rd_data;
 						as_		   = `ENABLE_;
-					end else begin						   // ¥ß¥¹¥¢¥é¥¤¥ó
+					end else begin						   // ãƒŸã‚¹ã‚¢ãƒ©ã‚¤ãƒ³
 						miss_align	= `ENABLE;
 					end
 				end
-				`MEM_OP_STW : begin // ¥ï©`¥É•ø¤­Şz¤ß
-					/* ¥Ğ¥¤¥È¥ª¥Õ¥»¥Ã¥È¤Î¥Á¥§¥Ã¥¯ */
-					if (offset == `BYTE_OFFSET_WORD) begin // ¥¢¥é¥¤¥ó
+				`MEM_OP_STW : begin // ãƒ¯ãƒ¼ãƒ‰æ›¸ãè¾¼ã¿
+					/* ãƒã‚¤ãƒˆã‚ªãƒ•ã‚»ãƒƒãƒˆã®ãƒã‚§ãƒƒã‚¯ */
+					if (offset == `BYTE_OFFSET_WORD) begin // ã‚¢ãƒ©ã‚¤ãƒ³
 						rw			= `WRITE;
 						as_		   = `ENABLE_;
-					end else begin						   // ¥ß¥¹¥¢¥é¥¤¥ó
+					end else begin						   // ãƒŸã‚¹ã‚¢ãƒ©ã‚¤ãƒ³
 						miss_align	= `ENABLE;
 					end
 				end
-				default		: begin // ¥á¥â¥ê¥¢¥¯¥»¥¹¤Ê¤·
+				default		: begin // ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹ãªã—
 					out			= ex_out;
 				end
 			endcase

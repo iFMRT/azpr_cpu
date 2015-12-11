@@ -1,40 +1,40 @@
-/*
+﻿/*
  -- ============================================================================
  -- FILE NAME	: spm.h
- -- DESCRIPTION : ������å��ѥåɥ���إå�
+ -- DESCRIPTION : スクラッチパッドメモリヘッダ
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ��Ҏ����
+ -- 1.0.0	  2011/06/27  suito		 新規作成
  -- ============================================================================
 */
 
 `ifndef __SPM_HEADER__
-	`define __SPM_HEADER__			  // ���󥯥�`�ɥ��`��
+	`define __SPM_HEADER__			  // インクルードガード
 
 /*
- * ��SPM�Υ������ˤĤ��ơ�
- * ?SPM�Υ�������������ˤϡ�
- *	 SPM_SIZE��SPM_DEPTH��SPM_ADDR_W��SpmAddrBus��SpmAddrLoc���������¤�����
- * ?SPM_SIZE��SPM�Υ��������x���Ƥ��ޤ���
- * ?SPM_DEPTH��SPM������x���Ƥ��ޤ���
- *	 SPM�η��ϻ����Ĥ�32bit��4Byte���̶��ʤΤǡ�
- *	 SPM_DEPTH��SPM_SIZE��4�Ǹ�ä����ˤʤ�ޤ���
- * ?SPM_ADDR_W��SPM�Υ��ɥ쥹�����x���Ƥ��ꡢ
- *	 SPM_DEPTH��log2�������ˤʤ�ޤ���
- * ?SpmAddrBus��SpmAddrLoc��SPM_ADDR_W�ΥХ��Ǥ���
- *	 SPM_ADDR_W-1:0�Ȥ����¤�����
+ * 【SPMのサイズについて】
+ * ?SPMのサイズを変更するには、
+ *	 SPM_SIZE、SPM_DEPTH、SPM_ADDR_W、SpmAddrBus、SpmAddrLocを変更して下さい。
+ * ?SPM_SIZEはSPMのサイズを定義しています。
+ * ?SPM_DEPTHはSPMの深さを定義しています。
+ *	 SPMの幅は基本的に32bit（4Byte）固定なので、
+ *	 SPM_DEPTHはSPM_SIZEを4で割った値になります。
+ * ?SPM_ADDR_WはSPMのアドレス幅を定義しており、
+ *	 SPM_DEPTHをlog2した値になります。
+ * ?SpmAddrBusとSpmAddrLocはSPM_ADDR_Wのバスです。
+ *	 SPM_ADDR_W-1:0として下さい。
  *
- * ��SPM�Υ�����������
- * ?SPM�Υ�������16384Byte��16KB���Έ��ϡ�
- *	 SPM_DEPTH��16384��4��4096
- *	 SPM_ADDR_W��log2(4096)��12�Ȥʤ�ޤ���
+ * 【SPMのサイズの例】
+ * ?SPMのサイズが16384Byte（16KB）の場合、
+ *	 SPM_DEPTHは16384÷4で4096
+ *	 SPM_ADDR_Wはlog2(4096)で12となります。
  */
 
-	`define SPM_SIZE   16384 // SPM�Υ�����
-	`define SPM_DEPTH  4096	 // SPM���
-	`define SPM_ADDR_W 12	 // ���ɥ쥹��
-	`define SpmAddrBus 11:0	 // ���ɥ쥹�Х�
-	`define SpmAddrLoc 11:0	 // ���ɥ쥹��λ��
+	`define SPM_SIZE   16384 // SPMのサイズ
+	`define SPM_DEPTH  4096	 // SPMの深さ
+	`define SPM_ADDR_W 12	 // アドレス幅
+	`define SpmAddrBus 11:0	 // アドレスバス
+	`define SpmAddrLoc 11:0	 // アドレスの位置
 
 `endif
 

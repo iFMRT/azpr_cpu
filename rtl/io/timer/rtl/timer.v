@@ -1,56 +1,56 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: timer.v
- -- DESCRIPTION : ¶¨Ê±Æ÷
+ -- DESCRIPTION : å®šæ—¶å™¨
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- 1.0.1	  2014/06/27  zhangly
  -- ============================================================================
 */
 
-/********** Í¨ÓÃÍ·ÎÄ¼ş **********/
+/********** é€šç”¨å¤´æ–‡ä»¶ **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** Ä£¿éÍ·ÎÄ¼ş **********/
+/********** æ¨¡å—å¤´æ–‡ä»¶ **********/
 `include "timer.h"
 
-/********** Ä£¿é **********/
+/********** æ¨¡å— **********/
 module timer (
-	/********** Ê±ÖÓÓë¸´Î» **********/
-	input  wire					clk,	   // Ê±ÖÓ
-	input  wire					reset,	   // Òì²½¸´Î»
-	/********** ×ÜÏß½Ó¿Ú **********/
-	input  wire					cs_,	   // Æ¬ÏÈ
-	input  wire					as_,	   // µØÖ·Ñ¡Í¨
+	/********** æ—¶é’Ÿä¸å¤ä½ **********/
+	input  wire					clk,	   // æ—¶é’Ÿ
+	input  wire					reset,	   // å¼‚æ­¥å¤ä½
+	/********** æ€»çº¿æ¥å£ **********/
+	input  wire					cs_,	   // ç‰‡å…ˆ
+	input  wire					as_,	   // åœ°å€é€‰é€š
 	input  wire					rw,		   // Read / Write
-	input  wire [`TimerAddrBus] addr,	   // µØÖ·
-	input  wire [`WordDataBus]	wr_data,   // Ğ´Êı¾İ
-	output reg	[`WordDataBus]	rd_data,   // ¶ÁÈ¡Êı¾İ
-	output reg					rdy_,	   // ¥ì¥Ç¥£
-	/********** ÖĞ¶ÏÊä³ö **********/
-	output reg					irq		   // ÖĞ¶ÏÇëÇó£¨¿ØÖÆ¼Ä´æÆ÷ 1£©
+	input  wire [`TimerAddrBus] addr,	   // åœ°å€
+	input  wire [`WordDataBus]	wr_data,   // å†™æ•°æ®
+	output reg	[`WordDataBus]	rd_data,   // è¯»å–æ•°æ®
+	output reg					rdy_,	   // ãƒ¬ãƒ‡ã‚£
+	/********** ä¸­æ–­è¾“å‡º **********/
+	output reg					irq		   // ä¸­æ–­è¯·æ±‚ï¼ˆæ§åˆ¶å¯„å­˜å™¨ 1ï¼‰
 );
 
-	/********** ¿ØÖÆ¼Ä´æÆ÷ **********/
-	// ¿ØÖÆ¼Ä´æÆ÷ 0 : ¿ØÖÆ
-	reg							mode;	   //Ä£Ê½
-	reg							start;	   // ÆğÊ¼Î»
-	// ¿ØÖÆ¼Ä´æÆ÷ 2 : µ½ÆÚÖµ
-	reg [`WordDataBus]			expr_val;  // µ½ÆÚÖµ
-	// ¿ØÖÆ¼Ä´æÆ÷ 3 : ¼ÆÊıÆ÷
-	reg [`WordDataBus]			counter;   // ¼ÆÊıÆ÷
+	/********** æ§åˆ¶å¯„å­˜å™¨ **********/
+	// æ§åˆ¶å¯„å­˜å™¨ 0 : æ§åˆ¶
+	reg							mode;	   //æ¨¡å¼
+	reg							start;	   // èµ·å§‹ä½
+	// æ§åˆ¶å¯„å­˜å™¨ 2 : åˆ°æœŸå€¼
+	reg [`WordDataBus]			expr_val;  // åˆ°æœŸå€¼
+	// æ§åˆ¶å¯„å­˜å™¨ 3 : è®¡æ•°å™¨
+	reg [`WordDataBus]			counter;   // è®¡æ•°å™¨
 
-	/********** µ½ÆÚ±êÖ¾ **********/
+	/********** åˆ°æœŸæ ‡å¿— **********/
 	wire expr_flag = ((start == `ENABLE) && (counter == expr_val)) ?
 					 `ENABLE : `DISABLE;
 
-	/********** ¶¨Ê±Æ÷¿ØÖÆ **********/
+	/********** å®šæ—¶å™¨æ§åˆ¶ **********/
 	always @(posedge clk or `RESET_EDGE reset) begin
 		if (reset == `RESET_ENABLE) begin
-			/* Òì²½¸´Î» */
+			/* å¼‚æ­¥å¤ä½ */
 			rd_data	 <= #1 `WORD_DATA_W'h0;
 			rdy_	 <= #1 `DISABLE_;
 			start	 <= #1 `DISABLE;
@@ -59,33 +59,33 @@ module timer (
 			expr_val <= #1 `WORD_DATA_W'h0;
 			counter	 <= #1 `WORD_DATA_W'h0;
 		end else begin
-			/* ×¼±¸¾ÍĞøĞ÷ */
+			/* å‡†å¤‡å°±ç»­ç»ª */
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_)) begin
 				rdy_	 <= #1 `ENABLE_;
 			end else begin
 				rdy_	 <= #1 `DISABLE_;
 			end
-			/* ¶Á·ÃÎÊ */
+			/* è¯»è®¿é—® */
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && (rw == `READ)) begin
 				case (addr)
-					`TIMER_ADDR_CTRL	: begin // ¿ØÖÆ¼Ä´æÆ÷ 0
+					`TIMER_ADDR_CTRL	: begin // æ§åˆ¶å¯„å­˜å™¨ 0
 						rd_data	 <= #1 {{`WORD_DATA_W-2{1'b0}}, mode, start};
 					end
-					`TIMER_ADDR_INTR	: begin // ¿ØÖÆ¼Ä´æÆ÷ 1
+					`TIMER_ADDR_INTR	: begin // æ§åˆ¶å¯„å­˜å™¨ 1
 						rd_data	 <= #1 {{`WORD_DATA_W-1{1'b0}}, irq};
 					end
-					`TIMER_ADDR_EXPR	: begin // ¿ØÖÆ¼Ä´æÆ÷ 2
+					`TIMER_ADDR_EXPR	: begin // æ§åˆ¶å¯„å­˜å™¨ 2
 						rd_data	 <= #1 expr_val;
 					end
-					`TIMER_ADDR_COUNTER : begin // ¿ØÖÆ¼Ä´æÆ÷ 3
+					`TIMER_ADDR_COUNTER : begin // æ§åˆ¶å¯„å­˜å™¨ 3
 						rd_data	 <= #1 counter;
 					end
 				endcase
 			end else begin
 				rd_data	 <= #1 `WORD_DATA_W'h0;
 			end
-			/* Ğ´·ÃÎÊ */
-			// ¿ØÖÆ¼Ä´æÆ÷ 0
+			/* å†™è®¿é—® */
+			// æ§åˆ¶å¯„å­˜å™¨ 0
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && 
 				(rw == `WRITE) && (addr == `TIMER_ADDR_CTRL)) begin
 				start	 <= #1 wr_data[`TimerStartLoc];
@@ -94,19 +94,19 @@ module timer (
 						 (mode == `TIMER_MODE_ONE_SHOT)) begin
 				start	 <= #1 `DISABLE;
 			end
-			// ¿ØÖÆ¼Ä´æÆ÷ 1
+			// æ§åˆ¶å¯„å­˜å™¨ 1
 			if (expr_flag == `ENABLE) begin
 				irq		 <= #1 `ENABLE;
 			end else if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && 
 						 (rw == `WRITE) && (addr ==	 `TIMER_ADDR_INTR)) begin
 				irq		 <= #1 wr_data[`TimerIrqLoc];
 			end
-			// ¿ØÖÆ¼Ä´æÆ÷ 2
+			// æ§åˆ¶å¯„å­˜å™¨ 2
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && 
 				(rw == `WRITE) && (addr == `TIMER_ADDR_EXPR)) begin
 				expr_val <= #1 wr_data;
 			end
-			// ¿ØÖÆ¼Ä´æÆ÷ 3
+			// æ§åˆ¶å¯„å­˜å™¨ 3
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && 
 				(rw == `WRITE) && (addr == `TIMER_ADDR_COUNTER)) begin
 				counter	 <= #1 wr_data;

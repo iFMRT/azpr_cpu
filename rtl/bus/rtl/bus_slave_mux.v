@@ -1,90 +1,90 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: bus_slave_mux.v
- -- DESCRIPTION :×ÜÏß´ÓÊô¶àÂ·¸´ÓÃÆ÷ÊµÏÖ
+ -- DESCRIPTION :æ€»çº¿ä»å±å¤šè·¯å¤ç”¨å™¨å®ç°
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** ¹«ÓÃÍ·ÎÄ¼ş **********/
+/********** å…¬ç”¨å¤´æ–‡ä»¶ **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** Ä£¿éÍ·ÎÄ¼ş **********/
+/********** æ¨¡å—å¤´æ–‡ä»¶ **********/
 `include "bus.h"
 
-/********** Ä£¿é **********/
+/********** æ¨¡å— **********/
 module bus_slave_mux (
-	/********** ÊäÈëĞÅºÅ **********/
-	input  wire				   s0_cs_,	   // 0ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	input  wire				   s1_cs_,	   // 1ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	input  wire				   s2_cs_,	   // 2ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	input  wire				   s3_cs_,	   // 3ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	input  wire				   s4_cs_,	   // 4ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	input  wire				   s5_cs_,	   // 5ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	input  wire				   s6_cs_,	   // 6ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	input  wire				   s7_cs_,	   // 7ºÅ×ÜÏß´ÓÊôÆ¬Ñ¡
-	/********** ¥Ğ¥¹¥¹¥ì©`¥ÖĞÅºÅ **********/
-	// 0ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s0_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s0_rdy_,	   // ¾ÍĞ÷
-	// 1ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s1_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s1_rdy_,	   // ¾ÍĞ÷
-	// 2ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s2_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s2_rdy_,	   // ¾ÍĞ÷
-	// 3ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s3_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s3_rdy_,	   // ¾ÍĞ÷
-	// 4ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s4_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s4_rdy_,	   // ¾ÍĞ÷
-	// 5ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s5_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s5_rdy_,	   // ¾ÍĞ÷
-	// 6ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s6_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s6_rdy_,	   // ¾ÍĞ÷
-	// 7ºÅ×ÜÏß´ÓÊô
-	input  wire [`WordDataBus] s7_rd_data, // ¶Á³öµÄÊı¾İ
-	input  wire				   s7_rdy_,	   // ¾ÍĞ÷
-	/********** ×ÜÏßÖ÷¿Ø¹²ÏíĞÅºÅ **********/
-	output reg	[`WordDataBus] m_rd_data,  // ¶Á³öµÄÊı¾İ
-	output reg				   m_rdy_	   // ¾ÍĞ÷
+	/********** è¾“å…¥ä¿¡å· **********/
+	input  wire				   s0_cs_,	   // 0å·æ€»çº¿ä»å±ç‰‡é€‰
+	input  wire				   s1_cs_,	   // 1å·æ€»çº¿ä»å±ç‰‡é€‰
+	input  wire				   s2_cs_,	   // 2å·æ€»çº¿ä»å±ç‰‡é€‰
+	input  wire				   s3_cs_,	   // 3å·æ€»çº¿ä»å±ç‰‡é€‰
+	input  wire				   s4_cs_,	   // 4å·æ€»çº¿ä»å±ç‰‡é€‰
+	input  wire				   s5_cs_,	   // 5å·æ€»çº¿ä»å±ç‰‡é€‰
+	input  wire				   s6_cs_,	   // 6å·æ€»çº¿ä»å±ç‰‡é€‰
+	input  wire				   s7_cs_,	   // 7å·æ€»çº¿ä»å±ç‰‡é€‰
+	/********** ãƒã‚¹ã‚¹ãƒ¬ãƒ¼ãƒ–ä¿¡å· **********/
+	// 0å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s0_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s0_rdy_,	   // å°±ç»ª
+	// 1å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s1_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s1_rdy_,	   // å°±ç»ª
+	// 2å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s2_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s2_rdy_,	   // å°±ç»ª
+	// 3å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s3_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s3_rdy_,	   // å°±ç»ª
+	// 4å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s4_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s4_rdy_,	   // å°±ç»ª
+	// 5å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s5_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s5_rdy_,	   // å°±ç»ª
+	// 6å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s6_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s6_rdy_,	   // å°±ç»ª
+	// 7å·æ€»çº¿ä»å±
+	input  wire [`WordDataBus] s7_rd_data, // è¯»å‡ºçš„æ•°æ®
+	input  wire				   s7_rdy_,	   // å°±ç»ª
+	/********** æ€»çº¿ä¸»æ§å…±äº«ä¿¡å· **********/
+	output reg	[`WordDataBus] m_rd_data,  // è¯»å‡ºçš„æ•°æ®
+	output reg				   m_rdy_	   // å°±ç»ª
 );
 
-	/********** ×ÜÏß´ÓÊô¶àÂ·¸´ÓÃÆ÷ **********/
+	/********** æ€»çº¿ä»å±å¤šè·¯å¤ç”¨å™¨ **********/
 	always @(*) begin
-		/* Ñ¡ÔñÆ¬Ñ¡ĞÅºÅ¶ÔÓ¦µÄ´ÓÊô */
-		if (s0_cs_ == `ENABLE_) begin		   // ·ÃÎÊ0ºÅ×ÜÏß´ÓÊô
+		/* é€‰æ‹©ç‰‡é€‰ä¿¡å·å¯¹åº”çš„ä»å± */
+		if (s0_cs_ == `ENABLE_) begin		   // è®¿é—®0å·æ€»çº¿ä»å±
 			m_rd_data = s0_rd_data;
 			m_rdy_	  = s0_rdy_;
-		end else if (s1_cs_ == `ENABLE_) begin // ·ÃÎÊ1ºÅ×ÜÏß´ÓÊô
+		end else if (s1_cs_ == `ENABLE_) begin // è®¿é—®1å·æ€»çº¿ä»å±
 			m_rd_data = s1_rd_data;
 			m_rdy_	  = s1_rdy_;
-		end else if (s2_cs_ == `ENABLE_) begin // ·ÃÎÊ2ºÅ×ÜÏß´ÓÊô
+		end else if (s2_cs_ == `ENABLE_) begin // è®¿é—®2å·æ€»çº¿ä»å±
 			m_rd_data = s2_rd_data;
 			m_rdy_	  = s2_rdy_;
-		end else if (s3_cs_ == `ENABLE_) begin // ·ÃÎÊ3ºÅ×ÜÏß´ÓÊô
+		end else if (s3_cs_ == `ENABLE_) begin // è®¿é—®3å·æ€»çº¿ä»å±
 			m_rd_data = s3_rd_data;
 			m_rdy_	  = s3_rdy_;
-		end else if (s4_cs_ == `ENABLE_) begin // ·ÃÎÊ4ºÅ×ÜÏß´ÓÊô
+		end else if (s4_cs_ == `ENABLE_) begin // è®¿é—®4å·æ€»çº¿ä»å±
 			m_rd_data = s4_rd_data;
 			m_rdy_	  = s4_rdy_;
-		end else if (s5_cs_ == `ENABLE_) begin // ·ÃÎÊ5ºÅ×ÜÏß´ÓÊô
+		end else if (s5_cs_ == `ENABLE_) begin // è®¿é—®5å·æ€»çº¿ä»å±
 			m_rd_data = s5_rd_data;
 			m_rdy_	  = s5_rdy_;
-		end else if (s6_cs_ == `ENABLE_) begin // ·ÃÎÊ6ºÅ×ÜÏß´ÓÊô
+		end else if (s6_cs_ == `ENABLE_) begin // è®¿é—®6å·æ€»çº¿ä»å±
 			m_rd_data = s6_rd_data;
 			m_rdy_	  = s6_rdy_;
-		end else if (s7_cs_ == `ENABLE_) begin // ·ÃÎÊ7ºÅ×ÜÏß´ÓÊô
+		end else if (s7_cs_ == `ENABLE_) begin // è®¿é—®7å·æ€»çº¿ä»å±
 			m_rd_data = s7_rd_data;
 			m_rdy_	  = s7_rdy_;
-		end else begin						   // Ä¬ÈÏÖµ
+		end else begin						   // é»˜è®¤å€¼
 			m_rd_data = `WORD_DATA_W'h0;
 			m_rdy_	  = `DISABLE_;
 		end

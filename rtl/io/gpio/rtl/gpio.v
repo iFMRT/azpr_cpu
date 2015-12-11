@@ -1,59 +1,59 @@
-/*
+ï»¿/*
  -- ============================================================================
  -- FILE NAME	: gpio.v
  -- DESCRIPTION :  General Purpose I/O
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
- -- 1.0.0	  2011/06/27  suito		 ĞÂÒ×÷³É
+ -- 1.0.0	  2011/06/27  suito		 æ–°è¦ä½œæˆ
  -- ============================================================================
 */
 
-/********** ¹²Í¨¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å…±é€šãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "nettype.h"
 `include "stddef.h"
 `include "global_config.h"
 
-/********** ‚€„e¥Ø¥Ã¥À¥Õ¥¡¥¤¥ë **********/
+/********** å€‹åˆ¥ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ« **********/
 `include "gpio.h"
 
-/********** ¥â¥¸¥å©`¥ë **********/
+/********** ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ« **********/
 module gpio (
-	/********** ¥¯¥í¥Ã¥¯ & ¥ê¥»¥Ã¥È **********/
-	input  wire						clk,	 // ¥¯¥í¥Ã¥¯
-	input  wire						reset,	 // ¥ê¥»¥Ã¥È
-	/********** ¥Ğ¥¹¥¤¥ó¥¿¥Õ¥§©`¥¹ **********/
-	input  wire						cs_,	 // ¥Á¥Ã¥×¥»¥ì¥¯¥È
-	input  wire						as_,	 // ¥¢¥É¥ì¥¹¥¹¥È¥í©`¥Ö
+	/********** ã‚¯ãƒ­ãƒƒã‚¯ & ãƒªã‚»ãƒƒãƒˆ **********/
+	input  wire						clk,	 // ã‚¯ãƒ­ãƒƒã‚¯
+	input  wire						reset,	 // ãƒªã‚»ãƒƒãƒˆ
+	/********** ãƒã‚¹ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ **********/
+	input  wire						cs_,	 // ãƒãƒƒãƒ—ã‚»ãƒ¬ã‚¯ãƒˆ
+	input  wire						as_,	 // ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¹ãƒˆãƒ­ãƒ¼ãƒ–
 	input  wire						rw,		 // Read / Write
-	input  wire [`GpioAddrBus]		addr,	 // ¥¢¥É¥ì¥¹
-	input  wire [`WordDataBus]		wr_data, // •ø¤­Şz¤ß¥Ç©`¥¿
-	output reg	[`WordDataBus]		rd_data, // Õi¤ß³ö¤·¥Ç©`¥¿
-	output reg						rdy_	 // ¥ì¥Ç¥£
-	/********** šøÓÃÈë³öÁ¦¥İ©`¥È **********/
-`ifdef GPIO_IN_CH	 // ÈëÁ¦¥İ©`¥È¤ÎŒg×°
-	, input wire [`GPIO_IN_CH-1:0]	gpio_in	 // ÈëÁ¦¥İ©`¥È£¨ÖÆÓù¥ì¥¸¥¹¥¿0£©
+	input  wire [`GpioAddrBus]		addr,	 // ã‚¢ãƒ‰ãƒ¬ã‚¹
+	input  wire [`WordDataBus]		wr_data, // æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿
+	output reg	[`WordDataBus]		rd_data, // èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿
+	output reg						rdy_	 // ãƒ¬ãƒ‡ã‚£
+	/********** æ±ç”¨å…¥å‡ºåŠ›ãƒãƒ¼ãƒˆ **********/
+`ifdef GPIO_IN_CH	 // å…¥åŠ›ãƒãƒ¼ãƒˆã®å®Ÿè£…
+	, input wire [`GPIO_IN_CH-1:0]	gpio_in	 // å…¥åŠ›ãƒãƒ¼ãƒˆï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿0ï¼‰
 `endif
-`ifdef GPIO_OUT_CH	 // ³öÁ¦¥İ©`¥È¤ÎŒg×°
-	, output reg [`GPIO_OUT_CH-1:0] gpio_out // ³öÁ¦¥İ©`¥È£¨ÖÆÓù¥ì¥¸¥¹¥¿1£©
+`ifdef GPIO_OUT_CH	 // å‡ºåŠ›ãƒãƒ¼ãƒˆã®å®Ÿè£…
+	, output reg [`GPIO_OUT_CH-1:0] gpio_out // å‡ºåŠ›ãƒãƒ¼ãƒˆï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿1ï¼‰
 `endif
-`ifdef GPIO_IO_CH	 // Èë³öÁ¦¥İ©`¥È¤ÎŒg×°
-	, inout wire [`GPIO_IO_CH-1:0]	gpio_io	 // Èë³öÁ¦¥İ©`¥È£¨ÖÆÓù¥ì¥¸¥¹¥¿2£©
+`ifdef GPIO_IO_CH	 // å…¥å‡ºåŠ›ãƒãƒ¼ãƒˆã®å®Ÿè£…
+	, inout wire [`GPIO_IO_CH-1:0]	gpio_io	 // å…¥å‡ºåŠ›ãƒãƒ¼ãƒˆï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿2ï¼‰
 `endif
 );
 
-`ifdef GPIO_IO_CH	 // Èë³öÁ¦¥İ©`¥È¤ÎÖÆÓù
-	/********** Èë³öÁ¦ĞÅºÅ **********/
-	wire [`GPIO_IO_CH-1:0]			io_in;	 // ÈëÁ¦¥Ç©`¥¿
-	reg	 [`GPIO_IO_CH-1:0]			io_out;	 // ³öÁ¦¥Ç©`¥¿
-	reg	 [`GPIO_IO_CH-1:0]			io_dir;	 // Èë³öÁ¦·½Ïò£¨ÖÆÓù¥ì¥¸¥¹¥¿3£©
-	reg	 [`GPIO_IO_CH-1:0]			io;		 // Èë³öÁ¦
-	integer							i;		 // ¥¤¥Æ¥ì©`¥¿
+`ifdef GPIO_IO_CH	 // å…¥å‡ºåŠ›ãƒãƒ¼ãƒˆã®åˆ¶å¾¡
+	/********** å…¥å‡ºåŠ›ä¿¡å· **********/
+	wire [`GPIO_IO_CH-1:0]			io_in;	 // å…¥åŠ›ãƒ‡ãƒ¼ã‚¿
+	reg	 [`GPIO_IO_CH-1:0]			io_out;	 // å‡ºåŠ›ãƒ‡ãƒ¼ã‚¿
+	reg	 [`GPIO_IO_CH-1:0]			io_dir;	 // å…¥å‡ºåŠ›æ–¹å‘ï¼ˆåˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿3ï¼‰
+	reg	 [`GPIO_IO_CH-1:0]			io;		 // å…¥å‡ºåŠ›
+	integer							i;		 // ã‚¤ãƒ†ãƒ¬ãƒ¼ã‚¿
    
-	/********** Èë³öÁ¦ĞÅºÅ¤Î¾@¾A´úÈë **********/
-	assign io_in	   = gpio_io;			 // ÈëÁ¦¥Ç©`¥¿
-	assign gpio_io	   = io;				 // Èë³öÁ¦
+	/********** å…¥å‡ºåŠ›ä¿¡å·ã®ç¶™ç¶šä»£å…¥ **********/
+	assign io_in	   = gpio_io;			 // å…¥åŠ›ãƒ‡ãƒ¼ã‚¿
+	assign gpio_io	   = io;				 // å…¥å‡ºåŠ›
 
-	/********** Èë³öÁ¦·½Ïò¤ÎÖÆÓù **********/
+	/********** å…¥å‡ºåŠ›æ–¹å‘ã®åˆ¶å¾¡ **********/
 	always @(*) begin
 		for (i = 0; i < `GPIO_IO_CH; i = i + 1) begin : IO_DIR
 			io[i] = (io_dir[i] == `GPIO_DIR_IN) ? 1'bz : io_out[i];
@@ -62,47 +62,47 @@ module gpio (
 
 `endif
    
-	/********** GPIO¤ÎÖÆÓù **********/
+	/********** GPIOã®åˆ¶å¾¡ **********/
 	always @(posedge clk or `RESET_EDGE reset) begin
 		if (reset == `RESET_ENABLE) begin
-			/* ·ÇÍ¬ÆÚ¥ê¥»¥Ã¥È */
+			/* éåŒæœŸãƒªã‚»ãƒƒãƒˆ */
 			rd_data	 <= #1 `WORD_DATA_W'h0;
 			rdy_	 <= #1 `DISABLE_;
-`ifdef GPIO_OUT_CH	 // ³öÁ¦¥İ©`¥È¤Î¥ê¥»¥Ã¥È
+`ifdef GPIO_OUT_CH	 // å‡ºåŠ›ãƒãƒ¼ãƒˆã®ãƒªã‚»ãƒƒãƒˆ
 			gpio_out <= #1 {`GPIO_OUT_CH{`LOW}};
 `endif
-`ifdef GPIO_IO_CH	 // Èë³öÁ¦¥İ©`¥È¤Î¥ê¥»¥Ã¥È
+`ifdef GPIO_IO_CH	 // å…¥å‡ºåŠ›ãƒãƒ¼ãƒˆã®ãƒªã‚»ãƒƒãƒˆ
 			io_out	 <= #1 {`GPIO_IO_CH{`LOW}};
 			io_dir	 <= #1 {`GPIO_IO_CH{`GPIO_DIR_IN}};
 `endif
 		end else begin
-			/* ¥ì¥Ç¥£¤ÎÉú³É */
+			/* ãƒ¬ãƒ‡ã‚£ã®ç”Ÿæˆ */
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_)) begin
 				rdy_	 <= #1 `ENABLE_;
 			end else begin
 				rdy_	 <= #1 `DISABLE_;
 			end 
-			/* Õi¤ß³ö¤·¥¢¥¯¥»¥¹ */
+			/* èª­ã¿å‡ºã—ã‚¢ã‚¯ã‚»ã‚¹ */
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && (rw == `READ)) begin
 				case (addr)
-`ifdef GPIO_IN_CH	// ÈëÁ¦¥İ©`¥È¤ÎÕi¤ß³ö¤·
-					`GPIO_ADDR_IN_DATA	: begin // ÖÆÓù¥ì¥¸¥¹¥¿ 0
+`ifdef GPIO_IN_CH	// å…¥åŠ›ãƒãƒ¼ãƒˆã®èª­ã¿å‡ºã—
+					`GPIO_ADDR_IN_DATA	: begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 0
 						rd_data	 <= #1 {{`WORD_DATA_W-`GPIO_IN_CH{1'b0}}, 
 										gpio_in};
 					end
 `endif
-`ifdef GPIO_OUT_CH	// ³öÁ¦¥İ©`¥È¤ÎÕi¤ß³ö¤·
-					`GPIO_ADDR_OUT_DATA : begin // ÖÆÓù¥ì¥¸¥¹¥¿ 1
+`ifdef GPIO_OUT_CH	// å‡ºåŠ›ãƒãƒ¼ãƒˆã®èª­ã¿å‡ºã—
+					`GPIO_ADDR_OUT_DATA : begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 1
 						rd_data	 <= #1 {{`WORD_DATA_W-`GPIO_OUT_CH{1'b0}}, 
 										gpio_out};
 					end
 `endif
-`ifdef GPIO_IO_CH	// Èë³öÁ¦¥İ©`¥È¤ÎÕi¤ß³ö¤·
-					`GPIO_ADDR_IO_DATA	: begin // ÖÆÓù¥ì¥¸¥¹¥¿ 2
+`ifdef GPIO_IO_CH	// å…¥å‡ºåŠ›ãƒãƒ¼ãƒˆã®èª­ã¿å‡ºã—
+					`GPIO_ADDR_IO_DATA	: begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 2
 						rd_data	 <= #1 {{`WORD_DATA_W-`GPIO_IO_CH{1'b0}}, 
 										io_in};
 					 end
-					`GPIO_ADDR_IO_DIR	: begin // ÖÆÓù¥ì¥¸¥¹¥¿ 3
+					`GPIO_ADDR_IO_DIR	: begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 3
 						rd_data	 <= #1 {{`WORD_DATA_W-`GPIO_IO_CH{1'b0}}, 
 										io_dir};
 					end
@@ -111,19 +111,19 @@ module gpio (
 			end else begin
 				rd_data	 <= #1 `WORD_DATA_W'h0;
 			end
-			/* •ø¤­Şz¤ß¥¢¥¯¥»¥¹ */
+			/* æ›¸ãè¾¼ã¿ã‚¢ã‚¯ã‚»ã‚¹ */
 			if ((cs_ == `ENABLE_) && (as_ == `ENABLE_) && (rw == `WRITE)) begin
 				case (addr)
-`ifdef GPIO_OUT_CH	// ³öÁ¦¥İ©`¥È¤Ø¤Î•ø¤­¤³¤ß
-					`GPIO_ADDR_OUT_DATA : begin // ÖÆÓù¥ì¥¸¥¹¥¿ 1
+`ifdef GPIO_OUT_CH	// å‡ºåŠ›ãƒãƒ¼ãƒˆã¸ã®æ›¸ãã“ã¿
+					`GPIO_ADDR_OUT_DATA : begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 1
 						gpio_out <= #1 wr_data[`GPIO_OUT_CH-1:0];
 					end
 `endif
-`ifdef GPIO_IO_CH	// Èë³öÁ¦¥İ©`¥È¤Ø¤Î•ø¤­¤³¤ß
-					`GPIO_ADDR_IO_DATA	: begin // ÖÆÓù¥ì¥¸¥¹¥¿ 2
+`ifdef GPIO_IO_CH	// å…¥å‡ºåŠ›ãƒãƒ¼ãƒˆã¸ã®æ›¸ãã“ã¿
+					`GPIO_ADDR_IO_DATA	: begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 2
 						io_out	 <= #1 wr_data[`GPIO_IO_CH-1:0];
 					 end
-					`GPIO_ADDR_IO_DIR	: begin // ÖÆÓù¥ì¥¸¥¹¥¿ 3
+					`GPIO_ADDR_IO_DIR	: begin // åˆ¶å¾¡ãƒ¬ã‚¸ã‚¹ã‚¿ 3
 						io_dir	 <= #1 wr_data[`GPIO_IO_CH-1:0];
 					end
 `endif
