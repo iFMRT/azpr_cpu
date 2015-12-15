@@ -1,116 +1,116 @@
 ﻿/*
  -- ============================================================================
  -- FILE NAME	: bus_if.v
- -- DESCRIPTION : バスインタフェース
+ -- DESCRIPTION : 总线接口
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
  -- 1.0.0	  2011/06/27  suito		 新規作成
  -- ============================================================================
 */
 
-/********** 共通ヘッダファイル **********/
+/********** 通用头文件 **********/
 `include "nettype.h"
 `include "global_config.h"
 `include "stddef.h"
 
-/********** 個別ヘッダファイル **********/
+/********** 模块头文件 **********/
 `include "cpu.h"
 `include "bus.h"
 
-/********** モジュール **********/
+/********** 模块 **********/
 module bus_if (
-	/********** クロック & リセット **********/
-	input  wire				   clk,			   // クロック
-	input  wire				   reset,		   // 非同期リセット
-	/********** パイプライン制御信号 **********/
-	input  wire				   stall,		   // ストール
-	input  wire				   flush,		   // フラッシュ信号
-	output reg				   busy,		   // ビジー信号
-	/********** CPUインタフェース **********/
-	input  wire [`WordAddrBus] addr,		   // アドレス
-	input  wire				   as_,			   // アドレス有効
-	input  wire				   rw,			   // 読み／書き
-	input  wire [`WordDataBus] wr_data,		   // 書き込みデータ
-	output reg	[`WordDataBus] rd_data,		   // 読み出しデータ
-	/********** SPMインタフェース **********/
-	input  wire [`WordDataBus] spm_rd_data,	   // 読み出しデータ
-	output wire [`WordAddrBus] spm_addr,	   // アドレス
-	output reg				   spm_as_,		   // アドレスストローブ
-	output wire				   spm_rw,		   // 読み／書き
-	output wire [`WordDataBus] spm_wr_data,	   // 書き込みデータ
-	/********** バスインタフェース **********/
-	input  wire [`WordDataBus] bus_rd_data,	   // 読み出しデータ
-	input  wire				   bus_rdy_,	   // レディ
-	input  wire				   bus_grnt_,	   // バスグラント
-	output reg				   bus_req_,	   // バスリクエスト
-	output reg	[`WordAddrBus] bus_addr,	   // アドレス
-	output reg				   bus_as_,		   // アドレスストローブ
-	output reg				   bus_rw,		   // 読み／書き
-	output reg	[`WordDataBus] bus_wr_data	   // 書き込みデータ
+	/********** 输入输出参数 **********/
+	input  wire				   clk,			   // 时钟
+	input  wire				   reset,		   // 异步复位
+	/********** 流水线控制信号 **********/
+	input  wire				   stall,		   // 延迟
+	input  wire				   flush,		   // 刷新信号
+	output reg				   busy,		   // 总线忙信号
+	/********** CPU接口 **********/
+	input  wire [`WordAddrBus] addr,		   // 地址
+	input  wire				   as_,			   // 地址选通信号
+	input  wire				   rw,			   // 读／写
+	input  wire [`WordDataBus] wr_data,		   // 写入的数据
+	output reg	[`WordDataBus] rd_data,		   // 读取的数据
+	/********** SPM接口 **********/
+	input  wire [`WordDataBus] spm_rd_data,	   // 读取的数据
+	output wire [`WordAddrBus] spm_addr,	   // 地址
+	output reg				   spm_as_,		   // 地址选通信号
+	output wire				   spm_rw,		   // 读／写
+	output wire [`WordDataBus] spm_wr_data,	   // 写入的数据
+	/********** 总线接口 **********/
+	input  wire [`WordDataBus] bus_rd_data,	   // 读取的数据
+	input  wire				   bus_rdy_,	   // 就绪
+	input  wire				   bus_grnt_,	   // 许可
+	output reg				   bus_req_,	   // 请求
+	output reg	[`WordAddrBus] bus_addr,	   // 地址
+	output reg				   bus_as_,		   // 地址选通信号
+	output reg				   bus_rw,		   // 读／写
+	output reg	[`WordDataBus] bus_wr_data	   // 写入的数据
 );
 
 	/********** 内部信号 **********/
-	reg	 [`BusIfStateBus]	   state;		   // バスインタフェースの状態
-	reg	 [`WordDataBus]		   rd_buf;		   // 読み出しバッファ
-	wire [`BusSlaveIndexBus]   s_index;		   // バススレーブインデックス
+	reg	 [`BusIfStateBus]	   state;		   // 总线接口状态
+	reg	 [`WordDataBus]		   rd_buf;		   // 读取的缓冲数据
+	wire [`BusSlaveIndexBus]   s_index;		   // 总线从属索引
 
-	/********** バススレーブのインデックス **********/
+	/********** 生成总线从属索引 **********/
 	assign s_index	   = addr[`BusSlaveIndexLoc];
 
-	/********** 出力のアサイン **********/
+	/********** 输出的赋值 **********/
 	assign spm_addr	   = addr;
 	assign spm_rw	   = rw;
 	assign spm_wr_data = wr_data;
 						 
-	/********** メモリアクセスの制御 **********/
+	/********** 内存访问控制 **********/
 	always @(*) begin
-		/* デフォルト値 */
+		/* 默认值 */
 		rd_data	 = `WORD_DATA_W'h0;
 		spm_as_	 = `DISABLE_;
 		busy	 = `DISABLE;
-		/* バスインタフェースの状態 */
+		/* 总线接口的状 */
 		case (state)
-			`BUS_IF_STATE_IDLE	 : begin // アイドル
-				/* メモリアクセス */
+			`BUS_IF_STATE_IDLE	 : begin // 空闲 
+				/* 内存访问 */
 				if ((flush == `DISABLE) && (as_ == `ENABLE_)) begin
-					/* アクセス先の選択 */
-					if (s_index == `BUS_SLAVE_1) begin // SPMへアクセス
-						if (stall == `DISABLE) begin // ストール発生のチェック
+					/* 选择访问目标 */
+					if (s_index == `BUS_SLAVE_1) begin // 访问SPM
+						if (stall == `DISABLE) begin // 检测延迟的发生
 							spm_as_	 = `ENABLE_;
-							if (rw == `READ) begin // 読み出しアクセス
+							if (rw == `READ) begin // 读取访问
 								rd_data	 = spm_rd_data;
 							end
 						end
-					end else begin					   // バスへアクセス
+					end else begin					   // 访问总线
 						busy	 = `ENABLE;
 					end
 				end
 			end
-			`BUS_IF_STATE_REQ	 : begin // バスリクエスト
+			`BUS_IF_STATE_REQ	 : begin // 请求总线
 				busy	 = `ENABLE;
 			end
-			`BUS_IF_STATE_ACCESS : begin // バスアクセス
-				/* レディ待ち */
-				if (bus_rdy_ == `ENABLE_) begin // レディ到着
-					if (rw == `READ) begin // 読み出しアクセス
+			`BUS_IF_STATE_ACCESS : begin // 访问总线
+				/* 等待就绪信号 */
+				if (bus_rdy_ == `ENABLE_) begin // 就绪信号有效
+					if (rw == `READ) begin // 读取访问
 						rd_data	 = bus_rd_data;
 					end
-				end else begin					// レディ未到着
+				end else begin					// 就绪信号无效
 					busy	 = `ENABLE;
 				end
 			end
-			`BUS_IF_STATE_STALL	 : begin // ストール
-				if (rw == `READ) begin // 読み出しアクセス
+			`BUS_IF_STATE_STALL	 : begin // 延迟
+				if (rw == `READ) begin // 读取访问
 					rd_data	 = rd_buf;
 				end
 			end
 		endcase
 	end
 
-   /********** バスインタフェースの状態制御 **********/ 
+   /********** 总线接口的状态控制 **********/ 
    always @(posedge clk or `RESET_EDGE reset) begin
 		if (reset == `RESET_ENABLE) begin
-			/* 非同期リセット */
+			/* 异步复位 */
 			state		<= #1 `BUS_IF_STATE_IDLE;
 			bus_req_	<= #1 `DISABLE_;
 			bus_addr	<= #1 `WORD_ADDR_W'h0;
@@ -119,13 +119,13 @@ module bus_if (
 			bus_wr_data <= #1 `WORD_DATA_W'h0;
 			rd_buf		<= #1 `WORD_DATA_W'h0;
 		end else begin
-			/* バスインタフェースの状態 */
+			/* 总线接口的状态 */
 			case (state)
-				`BUS_IF_STATE_IDLE	 : begin // アイドル
-					/* メモリアクセス */
+				`BUS_IF_STATE_IDLE	 : begin // 空闲
+					/* 内存访问 */
 					if ((flush == `DISABLE) && (as_ == `ENABLE_)) begin 
-						/* アクセス先の選択 */
-						if (s_index != `BUS_SLAVE_1) begin // バスへアクセス
+						/* 选择访问目标 */
+						if (s_index != `BUS_SLAVE_1) begin // 访问总线
 							state		<= #1 `BUS_IF_STATE_REQ;
 							bus_req_	<= #1 `ENABLE_;
 							bus_addr	<= #1 addr;
@@ -134,37 +134,37 @@ module bus_if (
 						end
 					end
 				end
-				`BUS_IF_STATE_REQ	 : begin // バスリクエスト
-					/* バスグラント待ち */
-					if (bus_grnt_ == `ENABLE_) begin // バス権獲得
+				`BUS_IF_STATE_REQ	 : begin // 请求总线
+					/* 等待总线许可 */
+					if (bus_grnt_ == `ENABLE_) begin // 获得总线使用权
 						state		<= #1 `BUS_IF_STATE_ACCESS;
 						bus_as_		<= #1 `ENABLE_;
 					end
 				end
-				`BUS_IF_STATE_ACCESS : begin // バスアクセス
-					/* アドレスストローブのネゲート */
+				`BUS_IF_STATE_ACCESS : begin // 访问总线
+					/* 使地址选通无效 */
 					bus_as_		<= #1 `DISABLE_;
-					/* レディ待ち */
-					if (bus_rdy_ == `ENABLE_) begin // レディ到着
+					/* 等待就绪信号 */
+					if (bus_rdy_ == `ENABLE_) begin // 就绪信号到达
 						bus_req_	<= #1 `DISABLE_;
 						bus_addr	<= #1 `WORD_ADDR_W'h0;
 						bus_rw		<= #1 `READ;
 						bus_wr_data <= #1 `WORD_DATA_W'h0;
-						/* 読み出しデータの保存 */
-						if (bus_rw == `READ) begin // 読み出しアクセス
+						/* 保存读取到的数据 */
+						if (bus_rw == `READ) begin // 读取访问
 							rd_buf		<= #1 bus_rd_data;
 						end
-						/* ストール発生のチェック */
-						if (stall == `ENABLE) begin // ストール発生
+						/* 检测是否发生延迟 */
+						if (stall == `ENABLE) begin // 发生延迟
 							state		<= #1 `BUS_IF_STATE_STALL;
-						end else begin				// ストール未発生
+						end else begin				// 未发生延迟
 							state		<= #1 `BUS_IF_STATE_IDLE;
 						end
 					end
 				end
-				`BUS_IF_STATE_STALL	 : begin // ストール
-					/* ストール発生のチェック */
-					if (stall == `DISABLE) begin // ストール解除
+				`BUS_IF_STATE_STALL	 : begin // 延迟
+					/* 检测是否发生延迟 */
+					if (stall == `DISABLE) begin // 解除延迟
 						state		<= #1 `BUS_IF_STATE_IDLE;
 					end
 				end
