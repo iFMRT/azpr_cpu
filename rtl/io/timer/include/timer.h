@@ -9,24 +9,24 @@
 */
 
 `ifndef __TIMER_HEADER__
-	`define __TIMER_HEADER__		 //  
+	`define __TIMER_HEADER__		 //  定时器头文件
 
-	/********** バス **********/
-	`define TIMER_ADDR_W		2	 // アドレス幅
-	`define TimerAddrBus		1:0	 // アドレスバス
-	`define TimerAddrLoc		1:0	 // アドレスの位置
-	/********** アドレスマップ **********/
-	`define TIMER_ADDR_CTRL		2'h0 // 制御レジスタ 0 : コントロール
-	`define TIMER_ADDR_INTR		2'h1 // 制御レジスタ 1 : 割り込み
-	`define TIMER_ADDR_EXPR		2'h2 // 制御レジスタ 2 : 満了値
-	`define TIMER_ADDR_COUNTER	2'h3 // 制御レジスタ 3 : カウンタ
-	/********** ビットマップ **********/
-	// 制御レジスタ 0 : コントロール
-	`define TimerStartLoc		0	 // スタートビットの位置
-	`define TimerModeLoc		1	 // モードビットの位置
-	`define TIMER_MODE_ONE_SHOT 1'b0 // モード : ワンショットタイマ
-	`define TIMER_MODE_PERIODIC 1'b1 // モード : 周期タイマ
-	// 制御レジスタ 1 : 割り込み要求
-	`define TimerIrqLoc			0	 // 割り込み要求ビットの位置
+	/********** 总线 **********/
+	`define TIMER_ADDR_W		2	 // 计时器地址宽度
+	`define TimerAddrBus		1:0	 // 计时器地址总线
+	`define TimerAddrLoc		1:0	 // 计时器地址位置 
+	/********** 地址选择 **********/
+	`define TIMER_ADDR_CTRL		2'h0 // 控制寄存器 0 ：控制 
+	`define TIMER_ADDR_INTR		2'h1 // 控制寄存器 1 ：中断
+	`define TIMER_ADDR_EXPR		2'h2 //控制寄存器 2 ：最大值 
+	`define TIMER_ADDR_COUNTER	2'h3 // 控制寄存器 3 ：计数器
+	/********** 处理 **********/
+	//  控制寄存器 0 ：控制
+	`define TimerStartLoc		0	 // 起始位的位置 
+	`define TimerModeLoc		1	 // 模式位的位置
+	`define TIMER_MODE_ONE_SHOT 1'b0 // 模式 ：单次定时器
+	`define TIMER_MODE_PERIODIC 1'b1 //模式 ：循环定时器
+	// 控制寄存器 1 ：中断 
+	`define TimerIrqLoc			0	 //控制寄存器 1 ：中断 
 
 `endif
