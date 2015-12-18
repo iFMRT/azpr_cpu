@@ -29,7 +29,7 @@ module timer (
 	input  wire [`TimerAddrBus] addr,	   // 地址
 	input  wire [`WordDataBus]	wr_data,   // 写数据
 	output reg	[`WordDataBus]	rd_data,   // 读取数据
-	output reg					rdy_,	   // レディ
+	output reg					rdy_,	   // 就绪信号
 	/********** 中断输出 **********/
 	output reg					irq		   // 中断请求（控制寄存器 1）
 );
