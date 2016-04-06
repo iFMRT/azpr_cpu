@@ -1,7 +1,7 @@
 ﻿/*
  -- ============================================================================
  -- FILE NAME	: ctrl.v
- -- DESCRIPTION : 制御ユニット
+ -- DESCRIPTION : 控制ユニット
  -- ----------------------------------------------------------------------------
  -- Revision  Date		  Coding_by	 Comment
  -- 1.0.0	  2011/06/27  suito		 新規作成
@@ -21,80 +21,80 @@
 
 /********** モジュール **********/
 module ctrl (
-	/********** クロック & リセット **********/
-	input  wire					  clk,			// クロック
-	input  wire					  reset,		// 非同期リセット
-	/********** 制御レジスタインタフェース **********/
-	input  wire [`RegAddrBus]	  creg_rd_addr, // 読み出しアドレス
-	output reg	[`WordDataBus]	  creg_rd_data, // 読み出しデータ
-	output reg	[`CpuExeModeBus]  exe_mode,		// 実行モード
-	/********** 割り込み **********/
-	input  wire [`CPU_IRQ_CH-1:0] irq,			// 割り込み要求
-	output reg					  int_detect,	// 割り込み検出
-	/********** ID/EXパイプラインレジスタ **********/
-	input  wire [`WordAddrBus]	  id_pc,		// プログラムカウンタ
-	/********** MEM/WBパイプラインレジスタ **********/
-	input  wire [`WordAddrBus]	  mem_pc,		// プログランカウンタ
-	input  wire					  mem_en,		// パイプラインデータの有効
-	input  wire					  mem_br_flag,	// 分岐フラグ
-	input  wire [`CtrlOpBus]	  mem_ctrl_op,	// 制御レジスタオペレーション
-	input  wire [`RegAddrBus]	  mem_dst_addr, // 書き込みアドレス
-	input  wire [`IsaExpBus]	  mem_exp_code, // 例外コード
-	input  wire [`WordDataBus]	  mem_out,		// 処理結果
-	/********** パイプライン制御信号 **********/
-	// パイプラインの状態
-	input  wire					  if_busy,		// IFステージビジー
-	input  wire					  ld_hazard,	// ロードハザード
-	input  wire					  mem_busy,		// MEMステージビジー
-	// ストール信号
-	output wire					  if_stall,		// IFステージストール
-	output wire					  id_stall,		// IDステージストール
-	output wire					  ex_stall,		// EXステージストール
-	output wire					  mem_stall,	// MEMステージストール
-	// フラッシュ信号
-	output wire					  if_flush,		// IFステージフラッシュ
-	output wire					  id_flush,		// IDステージフラッシュ
-	output wire					  ex_flush,		// EXステージフラッシュ
-	output wire					  mem_flush,	// MEMステージフラッシュ
-	output reg	[`WordAddrBus]	  new_pc		// 新しいプログラムカウンタ
+	/********** 时钟 & 复位 **********/
+	input  wire					  clk,			// 时钟
+	input  wire					  reset,		// 异步复位
+	/********** 控制寄存器接口 **********/
+	input  wire [`RegAddrBus]	  creg_rd_addr, // 读取地址
+	output reg	[`WordDataBus]	  creg_rd_data, // 读取数据
+	output reg	[`CpuExeModeBus]  exe_mode,		// 执行模式
+	/********** 中断 **********/
+	input  wire [`CPU_IRQ_CH-1:0] irq,			// 中断要求
+	output reg					  int_detect,	// 中断检测
+	/********** ID/EX流水线寄存器 **********/
+	input  wire [`WordAddrBus]	  id_pc,		// ID阶段的程序计数器
+	/********** MEM/WB流水线寄存器 **********/
+	input  wire [`WordAddrBus]	  mem_pc,		// MEM阶段的程序计数器
+	input  wire					  mem_en,		// 流水线数据是否有效
+	input  wire					  mem_br_flag,	// 分支标志位
+	input  wire [`CtrlOpBus]	  mem_ctrl_op,	// 控制寄存器操作
+	input  wire [`RegAddrBus]	  mem_dst_addr, // 写入地址
+	input  wire [`IsaExpBus]	  mem_exp_code, // 异常代码
+	input  wire [`WordDataBus]	  mem_out,		// 处理结果
+	/********** 流水线控制信号 **********/
+	// 流水线的状态
+	input  wire					  if_busy,		// IF阶段忙信号
+	input  wire					  ld_hazard,	// load 冲突
+	input  wire					  mem_busy,		// MEM阶段忙信号
+	// 停顿信号
+	output wire					  if_stall,		// IF阶段停顿
+	output wire					  id_stall,		// ID阶段停顿
+	output wire					  ex_stall,		// EX阶段停顿
+	output wire					  mem_stall,	// MEM阶段停顿
+	// 刷新信号
+	output wire					  if_flush,		// IF阶段刷新
+	output wire					  id_flush,		// ID阶段刷新
+	output wire					  ex_flush,		// EX阶段刷新
+	output wire					  mem_flush,	// MEM阶段刷新
+	output reg	[`WordAddrBus]	  new_pc		// 新程序计数器
 );
 
-	/********** 制御レジスタ **********/
-	reg							 int_en;		// 0番 : 割り込み有効
-	reg	 [`CpuExeModeBus]		 pre_exe_mode;	// 1番 : 実行モード
-	reg							 pre_int_en;	// 1番 : 割り込み有効
-	reg	 [`WordAddrBus]			 epc;			// 3番 : 例外プログラムカウンタ
-	reg	 [`WordAddrBus]			 exp_vector;	// 4番 : 例外ベクタ
-	reg	 [`IsaExpBus]			 exp_code;		// 5番 : 例外コード
-	reg							 dly_flag;		// 6番 : ディレイスロットフラグ
-	reg	 [`CPU_IRQ_CH-1:0]		 mask;			// 7番 : 割り込みマスク
+	/********** 控制寄存器 **********/
+	reg							 int_en;		// 0号 : 中断有效
+	reg	 [`CpuExeModeBus]		 pre_exe_mode;	// 1号 : 执行模式
+	reg							 pre_int_en;	// 1号 : 中断有效
+	reg	 [`WordAddrBus]			 epc;			// 3号 : 异常程序计数器
+	reg	 [`WordAddrBus]			 exp_vector;	// 4号 : 异常向量
+	reg	 [`IsaExpBus]			 exp_code;		// 5号 : 异常代码
+	reg							 dly_flag;		// 6号 : 停顿间隙标志位
+	reg	 [`CPU_IRQ_CH-1:0]		 mask;			// 7号 : 中断屏蔽
 
 	/********** 内部信号 **********/
-	reg [`WordAddrBus]		  pre_pc;			// 前のプログラムカウンタ
-	reg						  br_flag;			// 分岐フラグ
+	reg [`WordAddrBus]		  pre_pc;			// 前的程序计数器
+	reg						  br_flag;			// 分支标志位
 
-	/********** パイプライン制御信号 **********/
-	// ストール信号
+	/********** 流水线控制信号 **********/
+	// 停顿信号
 	wire   stall	 = if_busy | mem_busy;
 	assign if_stall	 = stall | ld_hazard;
 	assign id_stall	 = stall;
 	assign ex_stall	 = stall;
 	assign mem_stall = stall;
-	// フラッシュ信号
+	// 刷新信号
 	reg	   flush;
 	assign if_flush	 = flush;
 	assign id_flush	 = flush | ld_hazard;
 	assign ex_flush	 = flush;
 	assign mem_flush = flush;
 
-	/********** パイプラインフラッシュ制御 **********/
+	/********** 流水线刷新控制 **********/
 	always @(*) begin
-		/* デフォルト値 */
+		/* 默认值 */
 		new_pc = `WORD_ADDR_W'h0;
 		flush  = `DISABLE;
-		/* パイプラインフラッシュ */
-		if (mem_en == `ENABLE) begin // パイプラインのデータが有効
-			if (mem_exp_code != `ISA_EXP_NO_EXP) begin		 // 例外発生
+		/* 流水线刷新 */
+		if (mem_en == `ENABLE) begin // 流水线数据有效
+			if (mem_exp_code != `ISA_EXP_NO_EXP) begin		 // 异常发生
 				new_pc = exp_vector;
 				flush  = `ENABLE;
 			end else if (mem_ctrl_op == `CTRL_OP_EXRT) begin // EXRT命令
@@ -107,7 +107,7 @@ module ctrl (
 		end
 	end
 
-	/********** 割り込みの検出 **********/
+	/********** 中断检测 **********/
 	always @(*) begin
 		if ((int_en == `ENABLE) && ((|((~mask) & irq)) == `ENABLE)) begin
 			int_detect = `ENABLE;
@@ -116,55 +116,55 @@ module ctrl (
 		end
 	end
    
-	/********** 読み出しアクセス **********/
+	/********** 读取访问 **********/
 	always @(*) begin
 		case (creg_rd_addr)
-		   `CREG_ADDR_STATUS	 : begin // 0番:ステータス
+		   `CREG_ADDR_STATUS	 : begin // 0号:状态
 			   creg_rd_data = {{`WORD_DATA_W-2{1'b0}}, int_en, exe_mode};
 		   end
-		   `CREG_ADDR_PRE_STATUS : begin // 1番:例外発生前のステータス
+		   `CREG_ADDR_PRE_STATUS : begin // 1号:异常发生前的状态
 			   creg_rd_data = {{`WORD_DATA_W-2{1'b0}}, 
 							   pre_int_en, pre_exe_mode};
 		   end
-		   `CREG_ADDR_PC		 : begin // 2番:プログラムカウンタ
+		   `CREG_ADDR_PC		 : begin // 2号:程序计数器
 			   creg_rd_data = {id_pc, `BYTE_OFFSET_W'h0};
 		   end
-		   `CREG_ADDR_EPC		 : begin // 3番:例外プログラムカウンタ
+		   `CREG_ADDR_EPC		 : begin // 3号:异常程序计数器
 			   creg_rd_data = {epc, `BYTE_OFFSET_W'h0};
 		   end
-		   `CREG_ADDR_EXP_VECTOR : begin // 4番:例外ベクタ
+		   `CREG_ADDR_EXP_VECTOR : begin // 4号:异常向量
 			   creg_rd_data = {exp_vector, `BYTE_OFFSET_W'h0};
 		   end
-		   `CREG_ADDR_CAUSE		 : begin // 5番:例外原因
+		   `CREG_ADDR_CAUSE		 : begin // 5号:异常原因
 			   creg_rd_data = {{`WORD_DATA_W-1-`ISA_EXP_W{1'b0}}, 
 							   dly_flag, exp_code};
 		   end
-		   `CREG_ADDR_INT_MASK	 : begin // 6番:割り込みマスク
+		   `CREG_ADDR_INT_MASK	 : begin // 6号:中断屏蔽
 			   creg_rd_data = {{`WORD_DATA_W-`CPU_IRQ_CH{1'b0}}, mask};
 		   end
-		   `CREG_ADDR_IRQ		 : begin // 6番:割り込み原因
+		   `CREG_ADDR_IRQ		 : begin // 6号:中断原因
 			   creg_rd_data = {{`WORD_DATA_W-`CPU_IRQ_CH{1'b0}}, irq};
 		   end
-		   `CREG_ADDR_ROM_SIZE	 : begin // 7番:ROMのサイズ
+		   `CREG_ADDR_ROM_SIZE	 : begin // 7号:ROM容量
 			   creg_rd_data = $unsigned(`ROM_SIZE);
 		   end
-		   `CREG_ADDR_SPM_SIZE	 : begin // 8番:SPMのサイズ
+		   `CREG_ADDR_SPM_SIZE	 : begin // 8号:SPM容量
 			   creg_rd_data = $unsigned(`SPM_SIZE);
 		   end
-		   `CREG_ADDR_CPU_INFO	 : begin // 9番:CPUの情報
+		   `CREG_ADDR_CPU_INFO	 : begin // 9号:CPU 信息
 			   creg_rd_data = {`RELEASE_YEAR, `RELEASE_MONTH, 
 							   `RELEASE_VERSION, `RELEASE_REVISION};
 		   end
-		   default				 : begin // デフォルト値
+		   default				 : begin // 默认值
 			   creg_rd_data = `WORD_DATA_W'h0;
 		   end
 		endcase
 	end
 
-	/********** CPUの制御 **********/
+	/********** CPU  **********/
 	always @(posedge clk or `RESET_EDGE reset) begin
 		if (reset == `RESET_ENABLE) begin
-			/* 非同期リセット */
+			/* 异步复位 */
 			exe_mode	 <= #1 `CPU_KERNEL_MODE;
 			int_en		 <= #1 `DISABLE;
 			pre_exe_mode <= #1 `CPU_KERNEL_MODE;
@@ -177,13 +177,13 @@ module ctrl (
 			pre_pc		 <= #1 `WORD_ADDR_W'h0;
 			br_flag		 <= #1 `DISABLE;
 		end else begin
-			/* CPUの状態を更新 */
+			/* CPU状态更新 */
 			if ((mem_en == `ENABLE) && (stall == `DISABLE)) begin
-				/* PCと分岐フラグの保存 */
+				/* PC和分支标志位的保存 */
 				pre_pc		 <= #1 mem_pc;
 				br_flag		 <= #1 mem_br_flag;
-				/* CPUのステータス制御 */
-				if (mem_exp_code != `ISA_EXP_NO_EXP) begin		 // 例外発生
+				/* CPU的状态控制 */
+				if (mem_exp_code != `ISA_EXP_NO_EXP) begin		 // 异常发生
 					exe_mode	 <= #1 `CPU_KERNEL_MODE;
 					int_en		 <= #1 `DISABLE;
 					pre_exe_mode <= #1 exe_mode;
@@ -195,27 +195,27 @@ module ctrl (
 					exe_mode	 <= #1 pre_exe_mode;
 					int_en		 <= #1 pre_int_en;
 				end else if (mem_ctrl_op == `CTRL_OP_WRCR) begin // WRCR命令
-				   /* 制御レジスタへの書き込み */
+				   /* 写入控制寄存器 */
 					case (mem_dst_addr)
-						`CREG_ADDR_STATUS	  : begin // ステータス
+						`CREG_ADDR_STATUS	  : begin // 状态
 							exe_mode	 <= #1 mem_out[`CregExeModeLoc];
 							int_en		 <= #1 mem_out[`CregIntEnableLoc];
 						end
-						`CREG_ADDR_PRE_STATUS : begin // 例外発生前のステータス
+						`CREG_ADDR_PRE_STATUS : begin // 异常发生前的状态
 							pre_exe_mode <= #1 mem_out[`CregExeModeLoc];
 							pre_int_en	 <= #1 mem_out[`CregIntEnableLoc];
 						end
-						`CREG_ADDR_EPC		  : begin // 例外プログラムカウンタ
+						`CREG_ADDR_EPC		  : begin // 异常程序计数器
 							epc			 <= #1 mem_out[`WordAddrLoc];
 						end
-						`CREG_ADDR_EXP_VECTOR : begin // 例外ベクタ
+						`CREG_ADDR_EXP_VECTOR : begin // 异常向量
 							exp_vector	 <= #1 mem_out[`WordAddrLoc];
 						end
-						`CREG_ADDR_CAUSE	  : begin // 例外原因
+						`CREG_ADDR_CAUSE	  : begin // 异常原因
 							dly_flag	 <= #1 mem_out[`CregDlyFlagLoc];
 							exp_code	 <= #1 mem_out[`CregExpCodeLoc];
 						end
-						`CREG_ADDR_INT_MASK	  : begin // 割り込みマスク
+						`CREG_ADDR_INT_MASK	  : begin // 中断屏蔽
 							mask		 <= #1 mem_out[`CPU_IRQ_CH-1:0];
 						end
 					endcase
